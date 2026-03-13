@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/auth.php';
 requireSection('behavioral');
 
 $db = getDb();
+$tz = date('T');
 
 $rows = $db->query("
     SELECT session_id, page, events, event_count, saved_at
@@ -74,6 +75,15 @@ $stmt->execute();
 $r = $stmt->get_result()->fetch_assoc();
 if ($r) $comment = $r['analyst_comments'];
 
+// Chart config for export modal
+$chartConfig = [
+    ['id' => 'eventTypeChart',   'label' => 'Event Type Distribution'],
+    ['id' => 'dailyEventsChart', 'label' => 'Daily Event Volume'],
+    ['id' => 'errorChart',       'label' => 'JS Errors by Page'],
+    ['id' => 'engagementChart',  'label' => 'Engagement Breakdown'],
+];
+$section = 'behavioral';
+
 pageHead('Behavioral Analytics');
 renderNav('behavioral');
 ?>
@@ -81,9 +91,13 @@ renderNav('behavioral');
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:16px">
         <div>
             <h1>Behavioral Analytics</h1>
-            <p class="page-sub">User interaction analysis across <?= count($rows) ?> activity batches — <?= number_format($totalEvents) ?> total events, <?= $totalSessions ?> unique sessions</p>
+            <p class="page-sub">
+                User interaction analysis across <?= count($rows) ?> activity batches —
+                <?= number_format($totalEvents) ?> total events, <?= $totalSessions ?> unique sessions
+                <span style="color:#3d4f66;margin-left:6px">(all times <?= $tz ?>)</span>
+            </p>
         </div>
-        <button class="btn btn-secondary" id="exportBtn" onclick="exportPDF('behavioral')">Export PDF</button>
+        <button class="btn btn-secondary" onclick="openExportModal()">Export PDF</button>
     </div>
 
     <!-- KPI row -->
@@ -132,7 +146,7 @@ renderNav('behavioral');
         <table>
             <thead>
                 <tr>
-                    <th>Timestamp</th>
+                    <th>Timestamp (<?= $tz ?>)</th>
                     <th>Session ID</th>
                     <th>Page</th>
                     <th># Events</th>
@@ -255,20 +269,8 @@ function saveComment(section) {
     });
 }
 
-function exportPDF(section) {
-    const btn = document.getElementById('exportBtn');
-    btn.textContent = 'Generating…';
-    btn.disabled = true;
-    fetch('/api2/export.php?section=' + section)
-        .then(r => r.json())
-        .then(data => {
-            btn.textContent = 'Export PDF';
-            btn.disabled = false;
-            if (data.url) window.open(data.url, '_blank');
-            else alert('Export failed: ' + (data.error || 'unknown error'));
-        })
-        .catch(() => { btn.textContent = 'Export PDF'; btn.disabled = false; alert('Export request failed.'); });
-}
 </script>
+
+<?php include __DIR__ . '/../includes/export_modal.php'; ?>
 </body>
 </html>

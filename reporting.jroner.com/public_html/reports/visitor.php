@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/auth.php';
 requireSection('visitor');
 
 $db = getDb();
+$tz = date('T');
 
 // --- Data queries ---
 $rows = $db->query("
@@ -69,6 +70,16 @@ $stmt->execute();
 $r = $stmt->get_result()->fetch_assoc();
 if ($r) $comment = $r['analyst_comments'];
 
+// Chart config for export modal
+$chartConfig = [
+    ['id' => 'langChart',    'label' => 'Sessions by Browser Language'],
+    ['id' => 'pageChart',    'label' => 'Sessions by Page'],
+    ['id' => 'sessionChart', 'label' => 'Daily Unique Sessions'],
+    ['id' => 'networkChart', 'label' => 'Network Connection Types'],
+    ['id' => 'screenChart',  'label' => 'Screen Width Distribution'],
+];
+$section = 'visitor';
+
 pageHead('Visitor Analytics', 'canvas { display: block; }');
 renderNav('visitor');
 ?>
@@ -76,11 +87,12 @@ renderNav('visitor');
     <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px">
         <div>
             <h1>Visitor &amp; Session Analytics</h1>
-            <p class="page-sub">Aggregated from <?= count($rows) ?> static records across all sessions</p>
+            <p class="page-sub">
+                Aggregated from <?= count($rows) ?> static records
+                <span style="color:#3d4f66;margin-left:6px">(all times <?= $tz ?>)</span>
+            </p>
         </div>
-        <div style="display:flex;gap:10px;align-items:center">
-            <button class="btn btn-secondary" id="exportBtn" onclick="exportPDF('visitor')">Export PDF</button>
-        </div>
+        <button class="btn btn-secondary" onclick="openExportModal()">Export PDF</button>
     </div>
 
     <div class="charts-grid" style="margin-bottom:20px">
@@ -120,7 +132,7 @@ renderNav('visitor');
         <table>
             <thead>
                 <tr>
-                    <th>Timestamp</th>
+                    <th>Timestamp (<?= $tz ?>)</th>
                     <th>Session ID</th>
                     <th>Page</th>
                     <th>Language</th>
@@ -246,27 +258,8 @@ function saveComment(section) {
     .catch(e => console.error(e));
 }
 
-function exportPDF(section) {
-    const btn = document.getElementById('exportBtn');
-    btn.textContent = 'Generating…';
-    btn.disabled = true;
-    fetch('/api2/export.php?section=' + section)
-        .then(r => r.json())
-        .then(data => {
-            btn.textContent = 'Export PDF';
-            btn.disabled = false;
-            if (data.url) {
-                window.open(data.url, '_blank');
-            } else {
-                alert('Export failed: ' + (data.error || 'unknown error'));
-            }
-        })
-        .catch(e => {
-            btn.textContent = 'Export PDF';
-            btn.disabled = false;
-            alert('Export request failed.');
-        });
-}
 </script>
+
+<?php include __DIR__ . '/../includes/export_modal.php'; ?>
 </body>
 </html>
