@@ -77,8 +77,39 @@ if ($section === 'visitor') {
     $topPages  = implode(', ', array_map(fn($k,$v) => "$k ($v)", array_keys(array_slice($pageCounts, 0, 5)), array_slice($pageCounts, 0, 5)));
     $topNet    = implode(', ', array_map(fn($k,$v) => "$k ($v)", array_keys($netCounts), $netCounts));
     $stats = ["Total Records: " . count($dbRows)];
+
+    // Device Intelligence stats (from device_fingerprints table)
+    $fpDbRows = $db->query("SELECT canvas_fp, device_type, device_make, os_name, browser_name, browser_ver,
+        cpu_cores, device_mem, touch_points, pixel_ratio, webgl_renderer FROM device_fingerprints
+        ORDER BY saved_at DESC LIMIT 200")->fetch_all(MYSQLI_ASSOC);
+    $fpUnique = []; $fpDevTypes = []; $fpBrowsers = []; $fpOS = []; $fpMakes = [];
+    foreach ($fpDbRows as $fp) {
+        if ($fp['canvas_fp']) $fpUnique[$fp['canvas_fp']] = true;
+        $fpDevTypes[$fp['device_type'] ?: 'unknown'] = ($fpDevTypes[$fp['device_type'] ?: 'unknown'] ?? 0) + 1;
+        if ($fp['browser_name']) $fpBrowsers[$fp['browser_name']] = ($fpBrowsers[$fp['browser_name']] ?? 0) + 1;
+        if ($fp['os_name'])      $fpOS[$fp['os_name']]            = ($fpOS[$fp['os_name']] ?? 0) + 1;
+        if ($fp['device_make'])  $fpMakes[$fp['device_make']]     = ($fpMakes[$fp['device_make']] ?? 0) + 1;
+    }
+    arsort($fpBrowsers); arsort($fpOS); arsort($fpMakes);
+    $fpTotal = count($fpDbRows);
+    $fpHeaders = ['Canvas FP', 'Type', 'Make', 'OS', 'Browser', 'CPU', 'RAM(GB)', 'PxRatio', 'GPU'];
+    $fpTableRows = array_map(fn($fp) => [
+        $fp['canvas_fp'] ?? '—',
+        $fp['device_type'] ?? '—',
+        $fp['device_make'] ?? '—',
+        $fp['os_name'] ?? '—',
+        ($fp['browser_name'] ?? '—') . ' ' . substr($fp['browser_ver'] ?? '', 0, 5),
+        $fp['cpu_cores'] ?? '—',
+        $fp['device_mem'] ? $fp['device_mem'] . 'GB' : '—',
+        $fp['pixel_ratio'] ? 'x' . $fp['pixel_ratio'] : '—',
+        substr(preg_replace('/ANGLE \(([^,]+),\s*([^,]+?)(?:\s+\(.*\))?,.*\)/', '$2', $fp['webgl_renderer'] ?? '—'), 0, 28),
+    ], array_slice($fpDbRows, 0, 30));
+
     $aiSummary = "Section: Visitor & Session Analytics\nTotal records: " . count($dbRows) .
-        "\nTop languages: $topLangs\nTop pages: $topPages\nNetwork types: $topNet";
+        "\nTop languages: $topLangs\nTop pages: $topPages\nNetwork types: $topNet" .
+        "\nDevice fingerprints: $fpTotal sessions, " . count($fpUnique) . " unique" .
+        "\nTop browser: " . (array_key_first($fpBrowsers) ?? 'N/A') .
+        "\nTop OS: "      . (array_key_first($fpOS) ?? 'N/A');
 
 } elseif ($section === 'performance') {
     $title  = 'Performance Analytics Report';
@@ -341,13 +372,47 @@ class ReportPDF extends FPDF {
         $this->MultiCell(0, 5, iconv('UTF-8', 'latin1//TRANSLIT', $text), 1, 'L', true);
     }
 
-    function ChartImage(string $tmpPath, string $label, int $width = 180): void {
-        $this->SetFont('Helvetica', 'B', 9);
-        $this->SetTextColor(50, 60, 80);
-        $this->Cell(0, 6, $label, 0, 1);
-        if ($this->GetY() + 60 > 270) $this->AddPage();
-        $this->Image($tmpPath, 10, null, $width);
-        $this->Ln(4);
+    /**
+     * Place up to 2 charts side-by-side, with their labels above.
+     * @param array $charts  array of ['path'=>string, 'label'=>string], 1 or 2 entries
+     */
+    function ChartRow(array $charts): void {
+        if (!$charts) return;
+        $n       = count($charts);            // 1 or 2
+        $margin  = $this->lMargin;
+        $usable  = $this->w - $margin - $this->rMargin; // 190 for A4 with 10mm margins
+        $gutter  = 5;
+        $chartW  = $n === 1 ? $usable : ($usable - $gutter) / 2;
+        $labelH  = 6;
+
+        // Calculate row height from images' aspect ratios
+        $maxImgH = 50.0; // fallback mm
+        foreach ($charts as $c) {
+            $info = @getimagesize($c['path']);
+            if ($info && $info[0] > 0) {
+                $h = $chartW * $info[1] / $info[0];
+                if ($h > $maxImgH) $maxImgH = $h;
+            }
+        }
+        $rowH = $labelH + $maxImgH;
+
+        // Page-break guard
+        if ($this->GetY() + $rowH > $this->h - $this->bMargin) {
+            $this->AddPage();
+        }
+        $startY = $this->GetY();
+
+        foreach ($charts as $i => $chart) {
+            $x = $margin + ($chartW + $gutter) * $i;
+            // Label
+            $this->SetFont('Helvetica', 'B', 8);
+            $this->SetTextColor(50, 70, 100);
+            $this->SetXY($x, $startY);
+            $this->Cell($chartW, $labelH, $chart['label'], 0, 0, 'L');
+            // Image
+            $this->Image($chart['path'], $x, $startY + $labelH, $chartW);
+        }
+        $this->SetY($startY + $rowH + 5);
     }
 }
 
@@ -359,33 +424,45 @@ $pdf->SetMargins(10, 22, 10);
 $pdf->SetAutoPageBreak(true, 15);
 $pdf->AddPage();
 
+// ── Analyst commentary first ───────────────────────────────────────────────
+if ($comment) {
+    $pdf->SectionTitle('Analyst Commentary');
+    $pdf->CommentBox($comment);
+}
+
 // Summary stats
 if ($stats) {
     $pdf->SectionTitle('Summary');
     $pdf->StatsRow($stats);
 }
 
-// ── Charts (browser-captured images) ───────────────────────────────────────
-$tmpFiles = [];
+// ── Charts (browser-captured images, 2 per row) ────────────────────────────
+$tmpFiles  = [];
+$tmpCharts = []; // [{path, label}]
 if (!empty($chartImages)) {
-    $pdf->SectionTitle('Charts');
     foreach ($chartImages as $chart) {
         $label     = $chart['label']     ?? 'Chart';
         $imageData = $chart['imageData'] ?? '';
         if (!$imageData) continue;
 
-        // Strip data URI prefix (image/jpeg or image/png)
+        // Strip data URI prefix
         $base64 = preg_replace('/^data:image\/[a-z]+;base64,/', '', $imageData);
         $binary = base64_decode($base64);
         if (!$binary || strlen($binary) < 200) continue;
 
-        // Detect type from header bytes
         $ext     = (substr($binary, 0, 3) === "\xff\xd8\xff") ? 'jpg' : 'png';
         $tmpFile = tempnam(sys_get_temp_dir(), 'chart_') . '.' . $ext;
         file_put_contents($tmpFile, $binary);
-        $tmpFiles[] = $tmpFile;
+        $tmpFiles[]  = $tmpFile;
+        $tmpCharts[] = ['path' => $tmpFile, 'label' => $label];
+    }
 
-        $pdf->ChartImage($tmpFile, $label);
+    if ($tmpCharts) {
+        $pdf->SectionTitle('Charts');
+        // Render 2 per row
+        foreach (array_chunk($tmpCharts, 2) as $pair) {
+            $pdf->ChartRow($pair);
+        }
     }
 }
 
@@ -396,10 +473,51 @@ if ($includeData && $rows && $headers) {
     $pdf->DataTable($headers, array_slice($rows, 0, 80));
 }
 
-// ── Analyst commentary ─────────────────────────────────────────────────────
-if ($comment) {
-    $pdf->CommentBox($comment);
+// ── Device Intelligence section (visitor only) ─────────────────────────────
+if ($section === 'visitor' && $includeData && !empty($fpDbRows)) {
+    $pdf->AddPage();
+    $pdf->SectionTitle('Device Intelligence (' . count($fpDbRows) . ' fingerprinted sessions)');
+
+    // KPI summary
+    $fpKPIs = [
+        'Total Sessions: ' . $fpTotal,
+        'Unique Fingerprints: ' . count($fpUnique),
+        'Top Browser: ' . (array_key_first($fpBrowsers) ?? 'N/A') . ' (' . reset($fpBrowsers) . ')',
+        'Top OS: ' . (array_key_first($fpOS) ?? 'N/A'),
+        'Top Device Make: ' . (array_key_first($fpMakes) ?? 'N/A'),
+        'Desktop Sessions: ' . ($fpDevTypes['desktop'] ?? 0) . ' / Mobile: ' . ($fpDevTypes['mobile'] ?? 0),
+    ];
+    $pdf->StatsRow($fpKPIs);
+
+    // Breakdown tables side-by-side text
+    $pdf->SetFont('Helvetica', 'B', 9);
+    $pdf->SetTextColor(50, 100, 200);
+    $pdf->Cell(0, 6, 'Browser Breakdown', 0, 1);
+    $pdf->SetFont('Helvetica', '', 8);
+    $pdf->SetTextColor(40, 60, 90);
+    foreach (array_slice($fpBrowsers, 0, 8) as $k => $v) {
+        $pct = $fpTotal ? round($v / $fpTotal * 100) : 0;
+        $pdf->Cell(0, 5, iconv('UTF-8','latin1//TRANSLIT',"  $k: $v session" . ($v !== 1 ? 's' : '') . " ($pct%)"), 0, 1);
+    }
+    $pdf->Ln(2);
+
+    $pdf->SetFont('Helvetica', 'B', 9);
+    $pdf->SetTextColor(50, 100, 200);
+    $pdf->Cell(0, 6, 'OS Breakdown', 0, 1);
+    $pdf->SetFont('Helvetica', '', 8);
+    $pdf->SetTextColor(40, 60, 90);
+    foreach (array_slice($fpOS, 0, 8) as $k => $v) {
+        $pct = $fpTotal ? round($v / $fpTotal * 100) : 0;
+        $pdf->Cell(0, 5, iconv('UTF-8','latin1//TRANSLIT',"  $k: $v session" . ($v !== 1 ? 's' : '') . " ($pct%)"), 0, 1);
+    }
+    $pdf->Ln(4);
+
+    // Fingerprint detail table
+    $pdf->SectionTitle('Fingerprint Detail (last 30 sessions)');
+    $pdf->DataTable($fpHeaders, $fpTableRows);
 }
+
+// (analyst commentary already rendered at top)
 
 // ── AI section ─────────────────────────────────────────────────────────────
 if ($aiText) {

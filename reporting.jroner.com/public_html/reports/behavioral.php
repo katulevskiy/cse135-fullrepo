@@ -94,7 +94,7 @@ renderNav('behavioral');
             <p class="page-sub">
                 User interaction analysis across <?= count($rows) ?> activity batches —
                 <?= number_format($totalEvents) ?> total events, <?= $totalSessions ?> unique sessions
-                <span style="color:#3d4f66;margin-left:6px">(all times <?= $tz ?>)</span>
+                <span style="color:#3d4f66;margin-left:6px">(all times <span data-tz-label><?= $tz ?></span>)</span>
             </p>
         </div>
         <button class="btn btn-secondary" onclick="openExportModal()">Export PDF</button>
@@ -146,7 +146,7 @@ renderNav('behavioral');
         <table>
             <thead>
                 <tr>
-                    <th>Timestamp (<?= $tz ?>)</th>
+                    <th data-tz-header>Timestamp (<?= $tz ?>)</th>
                     <th>Session ID</th>
                     <th>Page</th>
                     <th># Events</th>
@@ -161,7 +161,7 @@ renderNav('behavioral');
                     $hasError = in_array('error', $types) || in_array('unhandledrejection', $types);
                 ?>
                 <tr>
-                    <td style="white-space:nowrap;font-size:12px;color:#7a8fa6"><?= htmlspecialchars(date('M j H:i:s', strtotime($row['saved_at']))) ?></td>
+                    <td style="white-space:nowrap;font-size:12px;color:#7a8fa6" data-ts="<?= date('Y-m-d\TH:i:s\Z', strtotime($row['saved_at'])) ?>"><?= htmlspecialchars(date('M j H:i:s', strtotime($row['saved_at']))) ?></td>
                     <td style="font-family:monospace;font-size:11px;color:#5a7090"><?= htmlspecialchars(substr($row['session_id'], 0, 12)) ?>…</td>
                     <td><?= htmlspecialchars($path) ?></td>
                     <td style="font-weight:600;color:<?= (int)$row['event_count'] > 10 ? '#fbbf24' : '#c8d6e8' ?>"><?= $row['event_count'] ?></td>
@@ -184,7 +184,43 @@ renderNav('behavioral');
         <div class="card-title" style="margin-bottom:4px">Analyst Commentary</div>
         <div class="card-sub">Interpret the behavioral patterns — engagement quality, error trends, interaction signatures.</div>
         <div style="margin-bottom:10px"></div>
-        <textarea id="commentBox" placeholder="e.g. Mouse movement dominates event volume (438 events), indicating passive browsing rather than active engagement. The 2 JS errors are concentrated on product-detail.html — consistent with chaos.js interference on that page. Click-to-scroll ratio suggests users scan pages rather than interact deeply. Idle events suggest visitors leave tabs open..."><?= htmlspecialchars($comment) ?></textarea>
+        <?php
+        if (!$comment) {
+            $topType    = array_key_first($eventTypeCounts) ?: 'mousemove';
+            $topTypeN   = reset($eventTypeCounts) ?: 0;
+            $topTypePct = $totalEvents ? round($topTypeN / $totalEvents * 100) : 0;
+            $activeN    = $engagementBuckets['Active (clicks/keys/scroll)'];
+            $mouseN     = $engagementBuckets['Mouse Movement'];
+            $idleN      = $engagementBuckets['Idle'];
+            $activePct  = $totalEvents ? round($activeN  / $totalEvents * 100) : 0;
+            $mousePct   = $totalEvents ? round($mouseN   / $totalEvents * 100) : 0;
+            $idlePct    = $totalEvents ? round($idleN    / $totalEvents * 100) : 0;
+            $topErrPage = $pageErrorCounts ? array_key_first($pageErrorCounts) : null;
+            $comment    = "Behavioral Analysis — " . date('F j, Y') . "\n\n"
+                . "Dataset: " . number_format($totalEvents) . " events across $totalSessions unique sessions "
+                . "(" . count($rows) . " activity batches).\n\n"
+                . "Event composition: \"$topType\" is the most frequent event type ($topTypeN occurrences, {$topTypePct}% of all events). "
+                . "Active engagement (clicks/keys/scroll) accounts for {$activePct}%, "
+                . "mouse movement {$mousePct}%, and idle periods {$idlePct}%.\n\n"
+                . ($activeN < $mouseN
+                    ? "The low active-to-passive ratio suggests visitors browse passively — scanning content without deep interaction. "
+                    . "Consider adding more interactive elements or CTAs to drive engagement.\n\n"
+                    : "Healthy active engagement ratio observed, indicating visitors are interacting meaningfully with the content.\n\n"
+                )
+                . ($errorCount > 0
+                    ? "JS Error alert: $errorCount error event" . ($errorCount !== 1 ? 's' : '') . " detected"
+                    . ($topErrPage ? ", concentrated on $topErrPage" : '') . ". "
+                    . "This is consistent with chaos.js interference on product-detail pages — errors are injected artificially. "
+                    . "Verify these are test artifacts before treating as production bugs.\n\n"
+                    : "No JavaScript errors detected in this dataset — clean session quality.\n\n"
+                )
+                . "Idle patterns: Idle start/end events indicate visitors frequently pause browsing. "
+                . "This could reflect multi-tab usage or deep reading behavior — correlate with scroll depth for clarity.\n\n"
+                . "Recommendation: Instrument specific user-intent actions (form submits, add-to-cart, link clicks) "
+                . "to distinguish signal from noise in the event stream.";
+        }
+        ?>
+        <textarea id="commentBox" placeholder="Analyst commentary for behavioral data..."><?= htmlspecialchars($comment) ?></textarea>
         <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
             <button class="btn btn-primary" onclick="saveComment('behavioral')">Save Commentary</button>
             <span id="save-feedback" style="font-size:13px;color:#34d399;display:none">Saved ✓</span>

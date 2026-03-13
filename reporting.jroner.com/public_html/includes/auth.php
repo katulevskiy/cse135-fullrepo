@@ -106,6 +106,68 @@ function renderNav(string $activePage = ''): void {
 
     echo '<div class="nav-right">';
     echo '<span class="nav-user">' . htmlspecialchars($user['username']) . ' <span class="nav-role">' . htmlspecialchars($role) . '</span></span>';
+    echo '<select id="tz-select" title="Display timezone" style="background:#0f1623;border:1px solid #2a3448;border-radius:5px;padding:3px 8px;font-size:11px;color:#94a3b8;cursor:pointer;max-width:160px;outline:none">';
+    $tzGroups = [
+        'UTC' => ['UTC' => 'UTC'],
+        'Americas' => [
+            'America/New_York'    => 'Eastern (ET)',
+            'America/Chicago'     => 'Central (CT)',
+            'America/Denver'      => 'Mountain (MT)',
+            'America/Phoenix'     => 'Arizona (MST)',
+            'America/Los_Angeles' => 'Pacific (PT)',
+            'America/Anchorage'   => 'Alaska (AKT)',
+            'America/Honolulu'    => 'Hawaii (HST)',
+            'America/Toronto'     => 'Toronto',
+            'America/Vancouver'   => 'Vancouver',
+            'America/Sao_Paulo'   => 'São Paulo',
+            'America/Buenos_Aires'=> 'Buenos Aires',
+            'America/Mexico_City' => 'Mexico City',
+        ],
+        'Europe' => [
+            'Europe/London'   => 'London (GMT/BST)',
+            'Europe/Paris'    => 'Paris (CET)',
+            'Europe/Berlin'   => 'Berlin (CET)',
+            'Europe/Madrid'   => 'Madrid (CET)',
+            'Europe/Rome'     => 'Rome (CET)',
+            'Europe/Amsterdam'=> 'Amsterdam (CET)',
+            'Europe/Stockholm'=> 'Stockholm (CET)',
+            'Europe/Helsinki' => 'Helsinki (EET)',
+            'Europe/Athens'   => 'Athens (EET)',
+            'Europe/Moscow'   => 'Moscow (MSK)',
+            'Europe/Istanbul' => 'Istanbul (TRT)',
+        ],
+        'Asia & Middle East' => [
+            'Asia/Dubai'      => 'Dubai (GST)',
+            'Asia/Kolkata'    => 'India (IST)',
+            'Asia/Dhaka'      => 'Dhaka (BST)',
+            'Asia/Bangkok'    => 'Bangkok (ICT)',
+            'Asia/Singapore'  => 'Singapore (SGT)',
+            'Asia/Shanghai'   => 'China (CST)',
+            'Asia/Hong_Kong'  => 'Hong Kong (HKT)',
+            'Asia/Tokyo'      => 'Tokyo (JST)',
+            'Asia/Seoul'      => 'Seoul (KST)',
+        ],
+        'Africa & Pacific' => [
+            'Africa/Cairo'       => 'Cairo (EET)',
+            'Africa/Nairobi'     => 'Nairobi (EAT)',
+            'Africa/Johannesburg'=> 'Johannesburg (SAST)',
+            'Pacific/Auckland'   => 'Auckland (NZST)',
+            'Australia/Sydney'   => 'Sydney (AEST)',
+            'Australia/Melbourne'=> 'Melbourne (AEST)',
+        ],
+    ];
+    foreach ($tzGroups as $groupLabel => $tzMap) {
+        if ($groupLabel === 'UTC') {
+            echo '<option value="UTC">UTC</option>';
+        } else {
+            echo '<optgroup label="' . htmlspecialchars($groupLabel) . '">';
+            foreach ($tzMap as $tzId => $tzLabel) {
+                echo '<option value="' . htmlspecialchars($tzId) . '">' . htmlspecialchars($tzLabel) . '</option>';
+            }
+            echo '</optgroup>';
+        }
+    }
+    echo '</select>';
     echo '<a href="/logout.php" class="logout">Logout</a>';
     echo '</div>';
     echo '</nav>';
@@ -170,6 +232,48 @@ function pageHead(string $title, string $extraCss = ''): void {
         .alert-error { background: #2d1a1a; border: 1px solid #7c2d2d; color: #f87171; }
         ' . $extraCss . '
     </style>
+    <script>
+    // ── Timezone conversion ────────────────────────────────────────────────
+    const _TZ_KEY = "analytics_tz";
+    function _getTZ() {
+        return localStorage.getItem(_TZ_KEY) ||
+               (typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "UTC");
+    }
+    function _fmtTs(isoStr, tz) {
+        try {
+            const d = new Date(isoStr);
+            if (isNaN(d)) return isoStr;
+            return d.toLocaleString("en-US", {
+                timeZone: tz, year: "numeric", month: "short",
+                day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false
+            });
+        } catch(e) { return isoStr; }
+    }
+    function _applyTZ() {
+        const tz = _getTZ();
+        document.querySelectorAll("[data-ts]").forEach(el => {
+            el.textContent = _fmtTs(el.getAttribute("data-ts"), tz);
+        });
+        // Update any tz-label spans
+        const shortLabel = tz.split("/").pop().replace(/_/g," ");
+        document.querySelectorAll("[data-tz-label]").forEach(el => { el.textContent = shortLabel; });
+        // Update table headers
+        document.querySelectorAll("[data-tz-header]").forEach(el => { el.textContent = "Timestamp (" + shortLabel + ")"; });
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        const sel = document.getElementById("tz-select");
+        if (!sel) return;
+        const savedTZ = _getTZ();
+        // Find exact match in options; fallback to UTC
+        const hasOpt = Array.from(sel.options).some(function(o) { return o.value === savedTZ; });
+        sel.value = hasOpt ? savedTZ : "UTC";
+        sel.addEventListener("change", function(e) {
+            localStorage.setItem(_TZ_KEY, e.target.value);
+            _applyTZ();
+        });
+        _applyTZ();
+    });
+    </script>
 </head>
 <body>
 ';

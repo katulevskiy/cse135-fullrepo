@@ -4,7 +4,7 @@
 
 | Role | Username | Password | Access |
 |---|---|---|---|
-| Super Admin | `admin` | `Admin@135!` | Everything: all 3 reports, user management, export, save |
+| Super Admin | `admin` | `Admin@135!` | Everything: all 3 reports, user management, export, save, AI analytics |
 | Analyst (Performance + Behavioral) | `sally` | `Analyst@135!` | Performance & Behavioral reports, save reports, export |
 | Analyst (Performance only) | `sam` | `Analyst@135!` | Performance report only |
 | Viewer | `viewer` | `Viewer@135!` | Saved Reports page only (read-only) |
@@ -20,65 +20,88 @@ Follow these steps to evaluate the system end-to-end:
 ### Step 1 — Viewer Experience
 1. Go to https://reporting.jroner.com/login.php
 2. Log in as **viewer** / `Viewer@135!`
-3. You should land on the **Saved Reports** page
-4. Verify that attempting to access https://reporting.jroner.com/reports/visitor.php redirects you to a **403 Access Denied** page
+3. You should land on the **Saved Reports** page (only page viewers can access)
+4. Verify that navigating to https://reporting.jroner.com/reports/visitor.php redirects to a **403 Access Denied** page
 5. Log out
 
 ### Step 2 — Restricted Analyst (sam)
 1. Log in as **sam** / `Analyst@135!`
 2. You should land on the **Performance Analytics** page (sam's only permitted section)
-3. Verify the nav shows only "Performance" and "Saved Reports" (no Visitor, Behavioral, or Admin links)
-4. Verify that attempting to access https://reporting.jroner.com/reports/visitor.php returns 403
-5. On the Performance page: scroll through the 4 charts and the "Slowest Sessions" table
-6. In the "Analyst Commentary" box, type a note about the product-detail.html anomaly and click **Save Commentary**
-7. Click **Export PDF** — a PDF should open in a new tab with the data table and your comment
-8. Log out
+3. Verify the nav shows only "Performance" and "Saved Reports" — no Visitor, Behavioral, or Admin links
+4. Confirm https://reporting.jroner.com/reports/visitor.php returns 403
+5. Scroll through the 4 charts (avg by page, time-series, histogram, timing breakdown) and KPI cards (avg, median, peak load)
+6. Note the data-driven analyst commentary pre-filled in the text area — edit it and click **Save Commentary**
+7. Click **Export PDF** → modal appears → select which charts to include → click Generate
+8. Confirm a PDF opens in a new tab with: commentary first, then summary, then chart images (2 per row, light backgrounds), then data table
+9. Log out
 
 ### Step 3 — Full Analyst (sally)
 1. Log in as **sally** / `Analyst@135!`
-2. You should land on the **Performance Analytics** page (sally's first permitted section)
-3. Navigate to **Behavioral Analytics** — confirm access
-4. Verify that the Visitor section is NOT accessible (no nav link; attempting the URL gives 403)
-5. On the Behavioral page: review the event type distribution chart and the JS error count
-6. Go to **Saved Reports** and click **+ Save New Report**
-7. Name it "Sally's Behavioral Analysis Q1", pick Behavioral, write a comment, click Save
-8. You should see the new report in the list
-9. Click **Generate PDF** on that report and download it
-10. Log out
+2. Navigate to **Behavioral Analytics** — confirm access
+3. Confirm the Visitor section is NOT accessible (no nav link; URL gives 403)
+4. Review the event type chart, JS errors by page bar chart, and engagement donut
+5. Note the pre-filled behavioral commentary summarizing event composition and error alerts
+6. Go to **Saved Reports** → click **+ Save New Report** → name it, pick Behavioral, add a comment, Save
+7. Click **Generate PDF** on the saved report — PDF should download correctly
+8. Log out
 
 ### Step 4 — Super Admin Full Walkthrough
 1. Log in as **admin** / `Admin@135!`
 2. You should land on the **Visitor Analytics** page
-3. Review all 5 charts (language, page, daily sessions, network, screen width) and the data table
-4. Navigate to **Performance Analytics** — note the KPI cards (avg load, peak, session count) and the stacked timing breakdown chart
-5. Navigate to **Behavioral Analytics** — note the JS errors by page bar chart (chaos.js effects visible)
-6. Click **Export PDF** on each section to generate PDFs
-7. Navigate to **Saved Reports** — you should see the report saved by sally and the Q1 Visitor Overview
-8. Go to **Admin** → verify you see all 4 users listed with their roles
-9. Click **Add User** → create a new test user (any username, role: analyst, section: visitor)
-10. Verify the new user appears in the list; delete it
-11. Try https://reporting.jroner.com/nonexistent_page.php — should show the 404 page
-12. Log out
+
+**Visitor page — check these features:**
+- 5 session charts: language (bar), page distribution (pie), daily sessions (line), network (donut), screen widths (horizontal bar)
+- **World Map** below screen width chart — city-dot markers show geographic IP origins. Hover for city + count tooltip.
+- **Device Intelligence section** below the map — KPI cards (unique fingerprints, top browser, top OS, mobile %), 6 charts (device type, browser, OS, device make, CPU cores, GPU renderer), and a detail table with canvas fingerprint hashes
+- **Timezone selector** in nav (top right) — change it and watch all table timestamps update live without a page reload
+- The analyst commentary textarea is **pre-filled** with a data-driven summary — you can edit and save it
+
+3. Navigate to **Performance Analytics**
+   - Review KPI cards (avg / median / peak load), note the median is much lower than the avg (outlier effect from chaos.js)
+   - Check the timing breakdown stacked bar chart (DNS / TCP / TTFB / DOM / Load per page)
+   - Pre-filled commentary explains the outlier issue automatically
+
+4. Navigate to **Behavioral Analytics**
+   - Note the JS error count KPI card and the "JS Errors by Page" chart
+   - Pre-filled commentary flags the chaos.js-related errors on product-detail
+
+5. Click **Export PDF** on the **Visitor** page:
+   - Modal shows separate checkboxes for all 5 session charts + 4 device fingerprint charts
+   - Check ✅ "Include raw data table"
+   - Enable ✅ AI Analytics (adds ~10–15s) — result includes an AI insights section at the end
+   - Confirm PDF opens with: commentary → summary → 2-per-row chart images (white bg) → data table → device intelligence → AI section
+
+6. Navigate to **Saved Reports** — should show report(s) saved by sally
+7. Navigate to **Admin** — verify all 4 users listed with roles and section badges
+8. Click **Add User** → create a test analyst with visitor access → verify it appears → delete it
+9. Try https://reporting.jroner.com/nonexistent.php — should show the styled **404** page
+10. Log out
 
 ---
 
 ## Known Issues & Architectural Concerns
 
-### Bugs / Limitations
+### Acknowledged Bugs / Limitations
 
-1. **PDF charts are text-only** — FPDF is a pure-PHP library that cannot execute JavaScript or render Canvas elements. Exported PDFs contain data tables and analyst commentary but no chart images. This is a known trade-off (dompdf would also have this limitation; wkhtmltopdf requires OS-level install). Acknowledged: chart snapshots via `canvas.toDataURL()` was left as future work.
+1. **FPDF latin1 character set** — FPDF's built-in fonts only support latin1. Unicode characters (e.g. emoji, accented letters) in commentary text are transliterated with `iconv('UTF-8','latin1//TRANSLIT',...)`. Unusual characters may appear approximated or dropped. Fix: embed a TTF font in FPDF (future work).
 
-2. **PDF generation within API (self-curl) is unreliable** — When saving a named report via `api2/reports.php`, the endpoint tries to auto-generate a PDF by making an internal curl request to itself. This self-referential HTTP call sometimes fails due to session forwarding issues. Workaround: the "Generate PDF" button on the Saved Reports page works correctly as it's initiated from the client with an active session.
+2. **Device fingerprint table is seeded with test data** — The 9 fingerprinted sessions in `device_fingerprints` were inserted manually as representative test data, since new visits to test.jroner.com will now auto-populate the table going forward via the updated `collector.js`. The seeded rows intentionally represent a realistic mix of browsers/OSes/devices.
 
-3. **Limited dataset** — With only 46 static records, 45 performance records, and ~250 activity batches (mostly from one session on test.html), many of the charts look sparse. The visualizations are architecturally correct but would be more meaningful with more diverse traffic on test.jroner.com.
+3. **Limited real dataset** — With ~70 static sessions and ~69 performance records (mostly UCSD network), charts are correct architecturally but sparse. The world map shows only US city dots because all resolved IPs are from San Diego / La Jolla. More diverse traffic would enrich every visualization.
 
-4. **No date range filtering** — Reports always show all available data. A date picker for filtering time windows was left as future work.
+4. **No date range filtering** — Reports always show all available data. A date picker for time-windowed reports was scoped as future work.
 
-5. **The original `/api/` endpoints remain unauthenticated** — The REST CRUD API for raw data (activity.php, performance.php, static.php) inherited from HW was not modified (ownership was locked to a different user). These are CORS-restricted to test.jroner.com but have no session-based auth. They should not be used by any user-facing page.
+5. **Self-referential PDF generation in `api2/reports.php`** — When saving a named report, the endpoint attempts to auto-generate a PDF via an internal HTTP call to itself. This sometimes fails due to session forwarding issues. Workaround: use the "Generate PDF" button on the Saved Reports page (client-initiated, fully reliable).
+
+6. **ip-api.com HTTP only** — The free tier of ip-api.com requires HTTP (not HTTPS) for the batch endpoint. The server-side PHP call goes out over HTTP, which is fine for server-to-API calls but means the geo data pipeline would need upgrading to the paid tier for production HTTPS compliance.
+
+7. **chart canvas not exportable on mobile** — If a user accesses the dashboard on a mobile browser where Chart.js canvas elements don't fully initialize before the modal opens, some chart captures may come back blank in the PDF. Reproduced only on very slow connections. Workaround: wait for charts to finish animating before clicking Export PDF.
 
 ### Architecture Notes
 
-- Sessions use PHP's default file-based storage — fine for a single-server setup but would need Redis/Memcached for multi-server deployment
-- Password hashing uses `password_hash()` with `PASSWORD_DEFAULT` (currently bcrypt) — properly future-proofed
-- The `exports/` directory is world-writable (chmod 777) because the Apache user (`www-data`) needs to write PDFs. In production, a more restrictive approach (www-data group ownership) would be appropriate
-- setup.php was used to create tables and should be deleted from the server post-grading (or kept as documentation — it uses `CREATE TABLE IF NOT EXISTS` and `INSERT IGNORE` so re-running is safe)
+- **Session storage**: PHP file-based sessions — correct for single-server; would need Redis for multi-server
+- **Password hashing**: `password_hash()` with `PASSWORD_DEFAULT` (bcrypt) — properly future-proofed
+- **exports/ directory**: chmod 777 to allow Apache (`www-data`) to write PDFs. In production, group-ownership approach (`chown www-data:dan`) would be more restrictive
+- **`collector.js` fingerprinting**: Canvas fingerprint is a djb2 hash over `canvas.toDataURL()`. It's a **soft identifier** — same device+browser+GPU = same hash; incognito mode, OS updates, or driver changes will produce a different hash. Not suitable as a hard user identifier, but useful for device diversity analytics
+- **OpenRouter API key**: Embedded in `api2/export.php`. In production this should be in an environment variable or secrets manager
+- **`setup.php`**: Was used once to create tables and can be safely re-run (all statements use `CREATE TABLE IF NOT EXISTS` / `INSERT IGNORE`). File has been deleted from the server post-setup

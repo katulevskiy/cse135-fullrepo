@@ -9,6 +9,12 @@ $user = getCurrentUser();
 $db   = getDb();
 $method = $_SERVER['REQUEST_METHOD'];
 
+// ── One-time migration (idempotent) ───────────────────────────────────────
+$colCheck = $db->query("SHOW COLUMNS FROM saved_reports LIKE 'config_json'");
+if ($colCheck && $colCheck->num_rows === 0) {
+    $db->query("ALTER TABLE saved_reports ADD COLUMN config_json TEXT DEFAULT NULL");
+}
+
 function jsonOut(bool $ok, array $extra = []): void {
     echo json_encode(array_merge(['ok' => $ok], $extra));
     exit;
@@ -30,7 +36,9 @@ if ($method === 'GET') {
         jsonOut(true, ['data' => $row]);
     }
     $reports = $db->query("
-        SELECT r.id, r.name, r.section, r.analyst_comments, r.html_path, r.pdf_path, r.created_at, u.username as creator
+        SELECT r.id, r.name, r.section, r.analyst_comments, r.config_json,
+               r.html_path, r.pdf_path, r.created_at, r.created_by,
+               u.username as creator
         FROM saved_reports r
         JOIN users u ON u.id = r.created_by
         WHERE r.name != '_comment'
@@ -72,48 +80,59 @@ if ($method === 'POST') {
     }
 
     if ($action === 'save_report') {
-        $name     = trim($body['name'] ?? '');
-        $section  = $body['section'] ?? '';
-        $comments = trim($body['analyst_comments'] ?? '');
-        $validSec = ['visitor', 'performance', 'behavioral'];
+        $name       = trim($body['name'] ?? '');
+        $section    = $body['section'] ?? '';          // primary/first section
+        $comments   = trim($body['analyst_comments'] ?? '');
+        $configJson = isset($body['config_json']) ? $body['config_json'] : null;
+        $validSec   = ['visitor', 'performance', 'behavioral'];
 
         if (!$name) jsonOut(false, ['error' => 'Name is required']);
         if (!in_array($section, $validSec)) jsonOut(false, ['error' => 'Invalid section']);
         if ($user['role'] === 'viewer') jsonOut(false, ['error' => 'Viewers cannot save reports']);
-        if ($user['role'] === 'analyst' && !in_array($section, $user['sections'] ?? [])) {
-            jsonOut(false, ['error' => 'No section access']);
+
+        // For analysts, check that every section in config is allowed
+        if ($user['role'] === 'analyst') {
+            $allowedSecs = $user['sections'] ?? [];
+            if ($configJson) {
+                $cfg = json_decode($configJson, true);
+                foreach (($cfg['sections'] ?? []) as $s) {
+                    if (!in_array($s['key'], $allowedSecs)) {
+                        jsonOut(false, ['error' => 'No access to section: ' . $s['key']]);
+                    }
+                }
+            } elseif (!in_array($section, $allowedSecs)) {
+                jsonOut(false, ['error' => 'No section access']);
+            }
         }
 
-        $stmt = $db->prepare("INSERT INTO saved_reports (name, section, analyst_comments, created_by) VALUES (?,?,?,?)");
-        $stmt->bind_param("sssi", $name, $section, $comments, $user['id']);
+        $stmt = $db->prepare("INSERT INTO saved_reports (name, section, analyst_comments, config_json, created_by) VALUES (?,?,?,?,?)");
+        $stmt->bind_param("ssssi", $name, $section, $comments, $configJson, $user['id']);
         $stmt->execute();
         if ($db->errno) jsonOut(false, ['error' => $db->error]);
         $newId = $db->insert_id;
 
-        // Try to generate PDF
-        $scheme = 'https';
-        $host = $_SERVER['HTTP_HOST'] ?? 'reporting.jroner.com';
-        $exportUrl = "$scheme://$host/api2/export.php?section=$section&report_id=$newId";
+        jsonOut(true, ['id' => $newId, 'message' => 'Report saved']);
+    }
 
-        $ch = curl_init($exportUrl);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 30,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_COOKIE         => session_name() . '=' . session_id(),
-        ]);
-        $pdfRes  = curl_exec($ch);
-        curl_close($ch);
+    // Update pdf_path after a multi-section PDF is generated
+    if ($action === 'update_pdf') {
+        $id      = (int)($body['id'] ?? 0);
+        $pdfPath = trim($body['pdf_path'] ?? '');
+        if (!$id || !$pdfPath) jsonOut(false, ['error' => 'id and pdf_path required']);
 
-        $pdfData = $pdfRes ? json_decode($pdfRes, true) : null;
-        if (!empty($pdfData['path'])) {
-            $pdfPath = $pdfData['path'];
-            $stmt2 = $db->prepare("UPDATE saved_reports SET pdf_path=? WHERE id=?");
-            $stmt2->bind_param("si", $pdfPath, $newId);
-            $stmt2->execute();
+        $stmt = $db->prepare("SELECT created_by FROM saved_reports WHERE id=?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if (!$row) jsonOut(false, ['error' => 'Not found']);
+        if ($user['role'] !== 'super_admin' && (int)$row['created_by'] !== (int)$user['id']) {
+            jsonOut(false, ['error' => 'Not allowed']);
         }
 
-        jsonOut(true, ['id' => $newId, 'message' => 'Report saved']);
+        $stmt = $db->prepare("UPDATE saved_reports SET pdf_path=? WHERE id=?");
+        $stmt->bind_param("si", $pdfPath, $id);
+        $stmt->execute();
+        jsonOut(true);
     }
 
     jsonOut(false, ['error' => 'Unknown action']);

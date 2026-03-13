@@ -97,15 +97,22 @@ async function doExportPDF(section) {
     const errEl = document.getElementById('exportError');
     errEl.style.display = 'none';
 
-    // Collect selected charts → capture canvas as JPEG
+    // Collect selected charts → capture canvas with white background as JPEG
     const charts = [];
     document.querySelectorAll('#chartChecks .chart-cb:checked').forEach(cb => {
         const canvas = document.getElementById(cb.value);
-        if (canvas) {
-            // JPEG avoids transparency issues in PDF and reduces file size
-            const imageData = canvas.toDataURL('image/jpeg', 0.92);
-            charts.push({ label: cb.dataset.label, imageData });
-        }
+        if (!canvas) return;
+        // Composite onto a white background so dark canvas CSS doesn't bleed
+        // into the PDF as a black rectangle (JPEG has no alpha channel)
+        const tmp = document.createElement('canvas');
+        tmp.width  = canvas.width;
+        tmp.height = canvas.height;
+        const ctx = tmp.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, tmp.width, tmp.height);
+        ctx.drawImage(canvas, 0, 0);
+        const imageData = tmp.toDataURL('image/jpeg', 0.92);
+        charts.push({ label: cb.dataset.label, imageData });
     });
 
     const includeData = document.getElementById('includeDataCb').checked;

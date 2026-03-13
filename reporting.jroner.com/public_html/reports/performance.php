@@ -125,7 +125,7 @@ renderNav('performance');
                 avg <?= number_format($overallAvg) ?>ms,
                 median <?= number_format($overallMedian) ?>ms,
                 peak <?= number_format($maxLoad) ?>ms
-                <span style="color:#3d4f66;margin-left:6px">(all times <?= $tz ?>)</span>
+                <span style="color:#3d4f66;margin-left:6px">(all times <span data-tz-label><?= $tz ?></span>)</span>
             </p>
         </div>
         <button class="btn btn-secondary" onclick="openExportModal()">Export PDF</button>
@@ -181,7 +181,7 @@ renderNav('performance');
                     <th>Load Time</th>
                     <th>Page</th>
                     <th>Session ID</th>
-                    <th>Recorded At (<?= $tz ?>)</th>
+                    <th data-tz-header>Recorded At (<?= $tz ?>)</th>
                 </tr>
             </thead>
             <tbody>
@@ -194,7 +194,7 @@ renderNav('performance');
                     <td style="font-weight:600;color:<?= $clr ?>;white-space:nowrap"><?= number_format($lt) ?>ms</td>
                     <td title="<?= htmlspecialchars($row['page'] ?? '') ?>"><?= htmlspecialchars($path) ?></td>
                     <td style="font-family:monospace;font-size:11px;color:#5a7090"><?= htmlspecialchars(substr($row['session_id'], 0, 14)) ?>…</td>
-                    <td style="font-size:12px;color:#7a8fa6;white-space:nowrap"><?= date('M j, Y H:i', strtotime($row['saved_at'])) ?></td>
+                    <td style="font-size:12px;color:#7a8fa6;white-space:nowrap" data-ts="<?= date('Y-m-d\TH:i:s\Z', strtotime($row['saved_at'])) ?>"><?= date('M j, Y H:i', strtotime($row['saved_at'])) ?></td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -207,7 +207,30 @@ renderNav('performance');
         <div class="card-title" style="margin-bottom:4px">Analyst Commentary</div>
         <div class="card-sub">Interpret performance data — note anomalies, root causes, recommendations.</div>
         <div style="margin-bottom:10px"></div>
-        <textarea id="commentBox" placeholder="e.g. product-detail.html shows a catastrophic avg of ~11.8s caused by chaos.js. Median is far lower (<?= number_format($overallMedian) ?>ms) indicating the high avg is driven by outliers. Recommend investigating resource-blocking scripts on product pages..."><?= htmlspecialchars($comment) ?></textarea>
+        <?php
+        if (!$comment) {
+            $slowest    = array_key_first($avgByPage) ?: 'N/A';
+            $slowestAvg = reset($avgByPage) ?: 0;
+            $fastest    = array_key_last($avgByPage)  ?: 'N/A';
+            $fastestAvg = end($avgByPage)             ?: 0;
+            $pagesCount = count($avgByPage);
+            $slowPct    = $totalRows ? round($buckets['>5s'] / $totalRows * 100) : 0;
+            $fastPct    = $totalRows ? round(($buckets['<100ms'] + $buckets['100–500ms']) / $totalRows * 100) : 0;
+            $comment    = "Performance Analysis — " . date('F j, Y') . "\n\n"
+                . "Dataset: $totalRows sessions across $pagesCount page paths.\n"
+                . "Overall avg load: " . number_format($overallAvg) . "ms | Median: " . number_format($overallMedian) . "ms | Peak: " . number_format($maxLoad) . "ms.\n\n"
+                . "Outlier alert: The avg is " . ($overallAvg > $overallMedian * 1.5 ? 'significantly' : 'moderately') . " higher than the median, "
+                . "indicating heavy-tailed distribution driven by outliers rather than typical session performance.\n\n"
+                . "Slowest page: $slowest (avg " . number_format($slowestAvg) . "ms) — likely affected by chaos.js or other blocking resources.\n"
+                . "Fastest page: $fastest (avg " . number_format($fastestAvg) . "ms).\n\n"
+                . "Load distribution: {$slowPct}% of sessions exceed 5s (poor UX threshold). "
+                . "{$fastPct}% load under 500ms (excellent). "
+                . "Priority: investigate resource-blocking scripts on $slowest.\n\n"
+                . "Recommendation: Implement resource hints (preload, prefetch), lazy-load below-fold assets, "
+                . "and audit third-party scripts. Removing chaos.js from production is the single highest-impact fix.";
+        }
+        ?>
+        <textarea id="commentBox" placeholder="Analyst commentary for performance data..."><?= htmlspecialchars($comment) ?></textarea>
         <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
             <button class="btn btn-primary" onclick="saveComment('performance')">Save Commentary</button>
             <span id="save-feedback" style="font-size:13px;color:#34d399;display:none">Saved ✓</span>
