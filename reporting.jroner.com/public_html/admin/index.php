@@ -19,7 +19,7 @@ pageHead('User Management');
 renderNav('admin');
 ?>
 <div class="content">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px">
         <div>
             <h1>User Management</h1>
             <p class="page-sub">Manage user accounts and section permissions</p>
@@ -35,8 +35,8 @@ renderNav('admin');
         <div class="alert alert-success">User deleted.</div>
     <?php endif; ?>
 
-    <div class="card">
-        <table>
+    <div class="card table-wrap">
+        <table style="min-width:560px">
             <thead>
                 <tr>
                     <th>ID</th>

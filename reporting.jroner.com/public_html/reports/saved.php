@@ -6,13 +6,12 @@ requireLogin();
 $db   = getDb();
 $user = getCurrentUser();
 
-// Run migration once (idempotent) — ADD COLUMN IF NOT EXISTS not supported on this MySQL version
+// Idempotent migration
 $colCheck = $db->query("SHOW COLUMNS FROM saved_reports LIKE 'config_json'");
 if ($colCheck && $colCheck->num_rows === 0) {
     $db->query("ALTER TABLE saved_reports ADD COLUMN config_json TEXT DEFAULT NULL");
 }
 
-// Fetch reports (config_json included)
 $reports = $db->query("
     SELECT r.id, r.name, r.section, r.analyst_comments, r.config_json,
            r.html_path, r.pdf_path, r.created_at, r.created_by,
@@ -25,58 +24,64 @@ $reports = $db->query("
 
 $canSave = in_array($user['role'], ['super_admin', 'analyst']);
 
-// Which sections can this user see?
 $availSections = [];
 if (canSeeSection('visitor'))     $availSections[] = 'visitor';
 if (canSeeSection('performance')) $availSections[] = 'performance';
 if (canSeeSection('behavioral'))  $availSections[] = 'behavioral';
 
 pageHead('Saved Reports', '
-    .report-card{background:#1a2133;border:1px solid #2a3448;border-radius:10px;padding:20px 24px;margin-bottom:14px}
+    .report-card{background:#1a2133;border:1px solid #2a3448;border-radius:10px;padding:20px 22px;margin-bottom:14px;transition:border-color .15s}
     .report-card:hover{border-color:#3a4a60}
     .report-name{font-size:16px;font-weight:600;color:#f0f4ff;margin-bottom:6px}
-    .report-meta{font-size:12px;color:#5a7090;display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
-    .report-comment{font-size:13px;color:#94a3b8;line-height:1.6;padding:12px;background:#131d2e;border-radius:6px;border-left:3px solid #4f8ef7;white-space:pre-wrap;max-height:120px;overflow:hidden}
+    .report-meta{font-size:12px;color:#5a7090;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+    .report-comment{font-size:13px;color:#94a3b8;line-height:1.6;padding:10px 12px;background:#131d2e;border-radius:6px;border-left:3px solid #4f8ef7;white-space:pre-wrap;max-height:110px;overflow:hidden}
+    .sec-comment-block{margin-bottom:8px}
+    .sec-comment-label{font-size:11px;font-weight:600;color:#5a7090;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;display:flex;align-items:center;gap:6px}
 
-    /* Modal */
-    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;align-items:center;justify-content:center}
+    /* ── Modal ────────────────────────────────────────────────────────── */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;align-items:center;justify-content:center;padding:16px}
     .modal-overlay.open{display:flex}
-    .modal{background:#1a2133;border:1px solid #2a3448;border-radius:10px;padding:28px 28px 20px;width:100%;max-width:660px;max-height:90vh;display:flex;flex-direction:column}
-    .modal-body{overflow-y:auto;flex:1;padding-right:6px}
-    .modal h2{font-size:18px;font-weight:600;color:#f0f4ff;margin-bottom:16px}
-    .form-group{margin-bottom:14px}
-    .form-label{display:block;font-size:11px;font-weight:700;color:#7a8fa6;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+    .modal{background:#1a2133;border:1px solid #2a3448;border-radius:10px;padding:24px 24px 18px;width:100%;max-width:660px;max-height:calc(100vh - 32px);display:flex;flex-direction:column}
+    .modal-body{overflow-y:auto;flex:1;padding-right:4px}
+    .modal h2{font-size:17px;font-weight:600;color:#f0f4ff;margin-bottom:14px;flex-shrink:0}
+    .form-group{margin-bottom:12px}
+    .form-label{display:block;font-size:11px;font-weight:700;color:#7a8fa6;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
     input[type=text],select,textarea{width:100%;background:#0f1623;border:1px solid #2a3448;border-radius:6px;padding:9px 12px;font-size:13px;color:#e2e8f0;outline:none;box-sizing:border-box}
     input[type=text]:focus,select:focus,textarea:focus{border-color:#4f8ef7}
-    textarea{resize:vertical}
+    textarea{resize:vertical;font-family:inherit}
 
-    /* Section toggle buttons */
+    /* ── Section toggles ──────────────────────────────────────────────── */
     .sec-toggle{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#0f1623;border:1px solid #2a3448;border-radius:8px;cursor:pointer;transition:border-color .15s;user-select:none}
     .sec-toggle:hover{border-color:#3a4a60}
     .sec-toggle.active{border-color:#4f8ef7;background:#111d30}
     .sec-toggle input[type=checkbox]{width:15px;height:15px;accent-color:#4f8ef7;cursor:pointer;flex-shrink:0}
     .sec-toggle-label{font-size:13px;font-weight:600;color:#c8d5e8}
 
-    /* Section config panel */
-    .sec-panel{background:#131d2e;border:1px solid #253040;border-radius:8px;padding:16px;margin-top:8px;display:none}
+    /* ── Section config panel ─────────────────────────────────────────── */
+    .sec-panel{background:#131d2e;border:1px solid #253040;border-radius:8px;padding:14px;margin-top:6px;display:none}
     .sec-panel.open{display:block}
-    .chart-grid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-    .chart-cb-label{display:flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;padding:4px 8px;background:#0f1623;border:1px solid #2a3448;border-radius:4px;cursor:pointer;white-space:nowrap}
-    .chart-cb-label input{accent-color:#4f8ef7}
+    .chart-grid{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 10px}
+    .chart-cb-label{display:flex;align-items:center;gap:5px;font-size:12px;color:#94a3b8;padding:4px 8px;background:#0f1623;border:1px solid #2a3448;border-radius:4px;cursor:pointer;white-space:nowrap}
+    .chart-cb-label input{accent-color:#4f8ef7;flex-shrink:0}
     .chart-cb-label:hover{border-color:#3a4a60;color:#c8d5e8}
-    .toggle-all-link{font-size:11px;color:#4f8ef7;cursor:pointer;margin-left:auto;text-decoration:none}
-    .toggle-all-link:hover{text-decoration:underline}
-    .include-data-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#94a3b8;margin-bottom:12px}
-    .include-data-row input{accent-color:#4f8ef7;width:14px;height:14px}
+    .include-data-row{display:flex;align-items:center;gap:7px;font-size:12px;color:#94a3b8;margin-bottom:10px}
+    .include-data-row input{accent-color:#4f8ef7;width:14px;height:14px;cursor:pointer}
 
-    /* Progress bar */
-    .progress-bar-wrap{height:4px;background:#1a2133;border-radius:2px;margin-top:6px;overflow:hidden;display:none}
+    /* ── Progress bar ─────────────────────────────────────────────────── */
+    .progress-bar-wrap{height:3px;background:#1a2133;border-radius:2px;margin-top:5px;overflow:hidden;display:none}
     .progress-bar{height:100%;background:#4f8ef7;border-radius:2px;transition:width .3s ease;width:0}
+
+    /* ── Modal responsive ─────────────────────────────────────────────── */
+    @media(max-width:640px){
+        .modal{padding:18px 16px 14px;max-height:calc(100vh - 24px)}
+        .chart-grid{gap:4px}
+        .chart-cb-label{font-size:11px;padding:3px 6px}
+    }
 ');
 renderNav('saved');
 ?>
 <div class="content">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px">
         <div>
             <h1>Saved Reports</h1>
             <p class="page-sub">
@@ -92,8 +97,6 @@ renderNav('saved');
         <?php endif; ?>
     </div>
 
-    <div id="save-status"></div>
-
     <?php if (empty($reports)): ?>
     <div class="card" style="text-align:center;padding:48px 24px">
         <div style="font-size:40px;margin-bottom:12px">📋</div>
@@ -105,25 +108,28 @@ renderNav('saved');
     <?php else: ?>
 
     <?php foreach ($reports as $r):
-        // Determine which sections this report covers
+        // Sections covered by this report
         $rSections = [$r['section']];
+        $sectionComments = [];   // [{key, comment}] for display
         if ($r['config_json']) {
             $cfg = json_decode($r['config_json'], true);
             if (!empty($cfg['sections'])) {
                 $rSections = array_column($cfg['sections'], 'key');
+                foreach ($cfg['sections'] as $s) {
+                    if (!empty($s['comment'])) {
+                        $sectionComments[] = ['key' => $s['key'], 'comment' => $s['comment']];
+                    }
+                }
             }
         }
-        // Preview comment: first section's comment from config_json, fallback to analyst_comments
-        $previewComment = $r['analyst_comments'] ?? '';
-        if ($r['config_json']) {
-            $cfg = json_decode($r['config_json'], true);
-            $firstComment = $cfg['sections'][0]['comment'] ?? '';
-            if ($firstComment) $previewComment = $firstComment;
+        // Fallback for legacy single-section reports
+        if (!$sectionComments && $r['analyst_comments']) {
+            $sectionComments[] = ['key' => $r['section'], 'comment' => $r['analyst_comments']];
         }
         $canDelete = ($user['role'] === 'super_admin' || (int)$r['created_by'] === (int)$user['id']);
     ?>
     <div class="report-card">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
             <div style="flex:1;min-width:0">
                 <div class="report-name"><?= htmlspecialchars($r['name']) ?></div>
                 <div class="report-meta">
@@ -133,25 +139,35 @@ renderNav('saved');
                     <span>By <?= htmlspecialchars($r['creator']) ?></span>
                     <span data-ts="<?= gmdate('c', strtotime($r['created_at'])) ?>"><?= date('M j, Y \a\t H:i', strtotime($r['created_at'])) ?></span>
                 </div>
-                <?php if ($previewComment): ?>
-                <div class="report-comment"><?= htmlspecialchars($previewComment) ?></div>
+                <?php if ($sectionComments): ?>
+                    <?php if (count($sectionComments) === 1 && count($rSections) === 1): ?>
+                        <div class="report-comment"><?= htmlspecialchars($sectionComments[0]['comment']) ?></div>
+                    <?php else: ?>
+                        <?php foreach ($sectionComments as $sc): ?>
+                        <div class="sec-comment-block">
+                            <div class="sec-comment-label">
+                                <span class="badge badge-<?= $sc['key'] ?>"><?= $sc['key'] ?></span>
+                            </div>
+                            <div class="report-comment"><?= htmlspecialchars($sc['comment']) ?></div>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
-            <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+            <div style="display:flex;flex-direction:column;gap:7px;flex-shrink:0;min-width:110px">
                 <?php if ($r['pdf_path']): ?>
                 <a href="/exports/<?= htmlspecialchars($r['pdf_path']) ?>" target="_blank"
-                   class="btn btn-primary" style="font-size:12px;padding:6px 14px">Download PDF</a>
+                   class="btn btn-primary" style="font-size:12px;padding:6px 14px;justify-content:center">Download PDF</a>
                 <?php elseif ($canSave): ?>
-                <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px"
+                <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px;width:100%;justify-content:center"
                         id="genbtn-<?= $r['id'] ?>"
                         onclick="genPDF(<?= $r['id'] ?>, this)">Generate PDF</button>
                 <div class="progress-bar-wrap" id="prog-<?= $r['id'] ?>">
                     <div class="progress-bar" id="progbar-<?= $r['id'] ?>"></div>
                 </div>
                 <?php endif; ?>
-
                 <?php if ($canDelete): ?>
-                <button class="btn btn-danger" style="font-size:12px;padding:6px 14px"
+                <button class="btn btn-danger" style="font-size:12px;padding:6px 14px;width:100%;justify-content:center"
                         onclick="deleteReport(<?= $r['id'] ?>,this)">Delete</button>
                 <?php endif; ?>
             </div>
@@ -162,7 +178,7 @@ renderNav('saved');
 </div>
 
 <?php if ($canSave && $availSections): ?>
-<!-- ── Save Report Modal ────────────────────────────────────────────────────── -->
+<!-- ── Save Report Modal ──────────────────────────────────────────────────── -->
 <div class="modal-overlay" id="saveModal">
     <div class="modal">
         <h2>Save New Report</h2>
@@ -179,22 +195,23 @@ renderNav('saved');
             <div class="form-group">
                 <div class="form-label" style="margin-bottom:8px">Sections to Include</div>
                 <div id="sectionToggles" style="display:flex;flex-direction:column;gap:6px">
-                    <?php foreach ($availSections as $sk):
-                        $slabels = ['visitor'=>'Visitor Analytics','performance'=>'Performance Analytics','behavioral'=>'Behavioral Analytics'];
-                    ?>
-                    <label class="sec-toggle" id="togwrap-<?= $sk ?>" onclick="toggleSection('<?= $sk ?>', event)">
-                        <input type="checkbox" id="sec-<?= $sk ?>" value="<?= $sk ?>">
+                    <?php
+                    $slabels = ['visitor'=>'Visitor Analytics','performance'=>'Performance Analytics','behavioral'=>'Behavioral Analytics'];
+                    foreach ($availSections as $sk): ?>
+                    <label class="sec-toggle" id="togwrap-<?= $sk ?>">
+                        <input type="checkbox" id="sec-<?= $sk ?>" value="<?= $sk ?>"
+                               onchange="onSectionChange('<?= $sk ?>', this)">
                         <span class="sec-toggle-label"><?= $slabels[$sk] ?></span>
                     </label>
                     <?php endforeach; ?>
                 </div>
             </div>
 
-            <!-- Per-section config panels (injected by JS) -->
+            <!-- Per-section config panels inserted by JS here -->
             <div id="sectionPanels"></div>
         </div>
 
-        <div style="display:flex;gap:10px;margin-top:16px;flex-shrink:0">
+        <div style="display:flex;gap:10px;margin-top:14px;flex-shrink:0;flex-wrap:wrap">
             <button class="btn btn-primary" id="saveReportBtn" onclick="saveReport()">Save Report</button>
             <button class="btn btn-secondary" onclick="closeSaveModal()">Cancel</button>
         </div>
@@ -239,7 +256,6 @@ const SECTION_LABELS = {
 function openSaveModal() {
     document.getElementById('modal-error').style.display = 'none';
     document.getElementById('reportName').value = '';
-    // Reset all checkboxes and panels
     document.querySelectorAll('#sectionToggles input[type=checkbox]').forEach(cb => {
         cb.checked = false;
         document.getElementById('togwrap-' + cb.value)?.classList.remove('active');
@@ -251,65 +267,68 @@ function closeSaveModal() {
     document.getElementById('saveModal').classList.remove('open');
 }
 
-// ── Toggle a section's config panel ──────────────────────────────────────
-function toggleSection(key, e) {
-    // Prevent double-fire when clicking the checkbox itself
-    if (e.target.tagName === 'INPUT') {
-        setTimeout(() => _applyToggle(key), 0);
-    } else {
-        const cb = document.getElementById('sec-' + key);
-        cb.checked = !cb.checked;
-        _applyToggle(key);
-    }
-}
-
-function _applyToggle(key) {
-    const cb      = document.getElementById('sec-' + key);
-    const wrap    = document.getElementById('togwrap-' + key);
-    const panels  = document.getElementById('sectionPanels');
-
-    wrap.classList.toggle('active', cb.checked);
+// ── Section checkbox change handler (no double-fire) ──────────────────────
+// Called by onchange on the <input> — NOT onclick on the <label>
+function onSectionChange(key, cb) {
+    document.getElementById('togwrap-' + key).classList.toggle('active', cb.checked);
+    const panels = document.getElementById('sectionPanels');
 
     if (cb.checked) {
         if (!document.getElementById('panel-' + key)) {
-            panels.appendChild(buildSectionPanel(key));
+            // Insert panel in the canonical order: visitor → performance → behavioral
+            const order = ['visitor', 'performance', 'behavioral'];
+            const newPanel = buildSectionPanel(key);
+            const myIdx = order.indexOf(key);
+            // Find existing panel that should come AFTER this one
+            let insertBefore = null;
+            for (let i = myIdx + 1; i < order.length; i++) {
+                const next = document.getElementById('panel-' + order[i]);
+                if (next) { insertBefore = next; break; }
+            }
+            if (insertBefore) panels.insertBefore(newPanel, insertBefore);
+            else panels.appendChild(newPanel);
+            // Trigger open after insertion
+            requestAnimationFrame(() => newPanel.classList.add('open'));
+        } else {
+            document.getElementById('panel-' + key).classList.add('open');
         }
-        document.getElementById('panel-' + key).classList.add('open');
     } else {
         const p = document.getElementById('panel-' + key);
-        if (p) { p.classList.remove('open'); setTimeout(() => p.remove(), 200); }
+        if (p) { p.classList.remove('open'); setTimeout(() => { if (p.parentNode) p.remove(); }, 180); }
     }
 }
 
-// ── Build a section config panel ──────────────────────────────────────────
+// ── Build a per-section config panel ─────────────────────────────────────
 function buildSectionPanel(key) {
-    const charts  = SECTION_CHARTS[key] || [];
-    const div     = document.createElement('div');
+    const charts = SECTION_CHARTS[key] || [];
+    const div    = document.createElement('div');
     div.className = 'sec-panel';
     div.id        = 'panel-' + key;
 
-    const chartCheckboxes = charts.map(c =>
+    const cbHtml = charts.map(c =>
         `<label class="chart-cb-label">
-            <input type="checkbox" class="chart-cb" data-section="${key}" value="${c.id}" checked> ${c.label}
+            <input type="checkbox" class="chart-cb" data-section="${key}" value="${c.id}" checked>
+            ${c.label}
         </label>`
     ).join('');
 
     div.innerHTML = `
-        <div style="display:flex;align-items:center;margin-bottom:6px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
             <div style="font-size:13px;font-weight:700;color:#4f8ef7">${SECTION_LABELS[key]}</div>
-            <span style="margin-left:auto;font-size:11px;color:#5a7090">Charts to capture</span>
+            ${charts.length ? `<div style="display:flex;gap:10px">
+                <a style="font-size:11px;color:#4f8ef7;cursor:pointer" onclick="toggleAllCharts('${key}',true)">Select all</a>
+                <a style="font-size:11px;color:#5a7090;cursor:pointer" onclick="toggleAllCharts('${key}',false)">None</a>
+            </div>` : ''}
         </div>
-        ${charts.length ? `
-        <div class="chart-grid">${chartCheckboxes}</div>
-        <div style="display:flex;gap:8px;margin-bottom:10px">
-            <a class="toggle-all-link" onclick="toggleAllCharts('${key}',true)">Select all</a>
-            <a class="toggle-all-link" onclick="toggleAllCharts('${key}',false)">None</a>
-        </div>` : '<div style="font-size:12px;color:#5a7090;margin-bottom:10px">No charts defined for this section.</div>'}
+        ${charts.length
+            ? `<div class="chart-grid">${cbHtml}</div>`
+            : `<div style="font-size:12px;color:#5a7090;margin-bottom:10px">No charts for this section.</div>`
+        }
         <div class="include-data-row">
             <input type="checkbox" id="incdata-${key}" class="include-data-cb" data-section="${key}" checked>
             <label for="incdata-${key}" style="cursor:pointer">Include data table in PDF</label>
         </div>
-        <div class="form-group" style="margin-bottom:6px">
+        <div class="form-group" style="margin-bottom:4px">
             <label class="form-label">Analyst Commentary</label>
             <textarea id="comment-${key}" class="comment-ta" data-section="${key}" rows="4"
                 placeholder="Write your analysis for the ${SECTION_LABELS[key]} section..."></textarea>
@@ -324,33 +343,28 @@ function toggleAllCharts(key, checked) {
 
 // ── Save report ───────────────────────────────────────────────────────────
 function saveReport() {
-    const name    = document.getElementById('reportName').value.trim();
-    const errEl   = document.getElementById('modal-error');
-    const btn     = document.getElementById('saveReportBtn');
-
+    const name  = document.getElementById('reportName').value.trim();
+    const errEl = document.getElementById('modal-error');
+    const btn   = document.getElementById('saveReportBtn');
     const showErr = msg => { errEl.textContent = msg; errEl.style.display = 'block'; };
     errEl.style.display = 'none';
 
     if (!name) { showErr('Report name is required.'); return; }
 
-    // Collect selected sections
     const checkedCbs = [...document.querySelectorAll('#sectionToggles input:checked')];
     if (!checkedCbs.length) { showErr('Select at least one section.'); return; }
 
     const sections = [];
     for (const cb of checkedCbs) {
-        const key = cb.value;
-        const chartIds = [...document.querySelectorAll(`.chart-cb[data-section="${key}"]:checked`)]
-                            .map(c => c.value);
+        const key      = cb.value;
+        const chartIds = [...document.querySelectorAll(`.chart-cb[data-section="${key}"]:checked`)].map(c => c.value);
         const includeData = document.getElementById('incdata-' + key)?.checked !== false;
-        const comment     = document.getElementById('comment-' + key)?.value.trim() || '';
+        const comment     = (document.getElementById('comment-' + key)?.value || '').trim();
         sections.push({key, chartIds, includeData, comment});
     }
 
     const primarySection = sections[0].key;
-    const primaryComment = sections[0].comment;
-
-    // Combine all section comments for the analyst_comments column (preview)
+    // Combined for analyst_comments column (used as preview fallback)
     const combinedComments = sections
         .filter(s => s.comment)
         .map(s => sections.length > 1 ? `[${SECTION_LABELS[s.key]}]\n${s.comment}` : s.comment)
@@ -360,14 +374,14 @@ function saveReport() {
     btn.disabled = true;
 
     fetch('/api2/reports.php', {
-        method: 'POST',
+        method:  'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-            action: 'save_report',
+            action:           'save_report',
             name,
-            section: primarySection,
+            section:          primarySection,
             analyst_comments: combinedComments,
-            config_json: JSON.stringify({sections}),
+            config_json:      JSON.stringify({sections}),
         })
     })
     .then(r => r.json())
@@ -391,10 +405,9 @@ async function genPDF(reportId, btn) {
     };
 
     btn.disabled = true;
-    setProgress(5, 'Loading config…');
+    setProgress(5, 'Loading…');
 
     try {
-        // 1. Fetch report config
         const resp = await fetch('/api2/reports.php?id=' + reportId);
         const data = await resp.json();
         if (!data.ok) throw new Error(data.error || 'Failed to load report config');
@@ -404,17 +417,14 @@ async function genPDF(reportId, btn) {
         if (report.config_json) {
             sections = JSON.parse(report.config_json).sections;
         } else {
-            // Legacy: no config_json, no chart capture
             sections = [{key: report.section, chartIds: [], includeData: true, comment: report.analyst_comments || ''}];
         }
 
-        // 2. Capture charts from each section's page via hidden iframe
         const sectionPayloads = [];
         const totalSecs = sections.length;
         for (let i = 0; i < totalSecs; i++) {
             const sec = sections[i];
-            const pct = 10 + Math.round((i / totalSecs) * 60);
-            setProgress(pct, `Capturing ${SECTION_LABELS[sec.key] || sec.key}… (${i+1}/${totalSecs})`);
+            setProgress(10 + Math.round((i / totalSecs) * 62), `Capturing ${SECTION_LABELS[sec.key] || sec.key}… (${i+1}/${totalSecs})`);
             const charts = await captureSection(sec.key, sec.chartIds || []);
             sectionPayloads.push({
                 section:     sec.key,
@@ -424,17 +434,11 @@ async function genPDF(reportId, btn) {
             });
         }
 
-        // 3. Generate multi-section PDF
         setProgress(78, 'Generating PDF…');
         const pdfResp = await fetch('/api2/export_multi.php', {
             method:  'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                sections: sectionPayloads,
-                reportId,
-                title:       report.name,
-                aiAnalysis:  false,
-            })
+            body: JSON.stringify({sections: sectionPayloads, reportId, title: report.name, aiAnalysis: false})
         });
         const pdfData = await pdfResp.json();
         if (!pdfData.ok) throw new Error(pdfData.error || 'PDF generation failed');
@@ -442,7 +446,7 @@ async function genPDF(reportId, btn) {
         setProgress(100, 'Done!');
         setTimeout(() => {
             btn.outerHTML = `<a href="${pdfData.url}" target="_blank"
-                class="btn btn-primary" style="font-size:12px;padding:6px 14px">Download PDF</a>`;
+                class="btn btn-primary" style="font-size:12px;padding:6px 14px;justify-content:center">Download PDF</a>`;
             if (progWrap) progWrap.style.display = 'none';
         }, 400);
 
@@ -460,18 +464,13 @@ function captureSection(sectionKey, chartIds) {
         if (!chartIds || !chartIds.length) { resolve([]); return; }
 
         const iframe = document.createElement('iframe');
-        iframe.style.cssText = [
-            'position:fixed', 'left:-9999px', 'top:-9999px',
-            'width:1280px', 'height:900px',
-            'visibility:hidden', 'border:none', 'z-index:-1',
-        ].join(';');
+        iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1280px;height:900px;visibility:hidden;border:none;z-index:-1';
         document.body.appendChild(iframe);
 
         const cleanup = () => { try { document.body.removeChild(iframe); } catch(_) {} };
         const timeout = setTimeout(() => { cleanup(); resolve([]); }, 22000);
 
         iframe.onload = function() {
-            // Wait for Chart.js animations to complete (default 1000ms + buffer)
             setTimeout(() => {
                 clearTimeout(timeout);
                 const charts = [];
@@ -484,8 +483,6 @@ function captureSection(sectionKey, chartIds) {
                         const doc    = iframe.contentDocument || iframe.contentWindow.document;
                         const canvas = doc.getElementById(id);
                         if (!canvas || !canvas.width) return;
-
-                        // Composite onto white background
                         const tmp = doc.createElement('canvas');
                         tmp.width  = canvas.width;
                         tmp.height = canvas.height;
@@ -501,7 +498,7 @@ function captureSection(sectionKey, chartIds) {
 
                 cleanup();
                 resolve(charts);
-            }, 1600); // 1.6s for chart animations
+            }, 1600);
         };
 
         iframe.onerror = function() { clearTimeout(timeout); cleanup(); resolve([]); };

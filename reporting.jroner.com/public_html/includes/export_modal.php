@@ -8,10 +8,10 @@
 <!-- ===== Export Modal ===== -->
 <div id="exportModal" style="
     display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);
-    z-index:200;align-items:center;justify-content:center;padding:20px">
+    z-index:200;align-items:center;justify-content:center;padding:16px">
   <div style="
       background:#1a2133;border:1px solid #2a3448;border-radius:12px;
-      padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto">
+      padding:24px;width:100%;max-width:480px;max-height:calc(100vh - 32px);overflow-y:auto">
 
     <h2 style="font-size:17px;font-weight:600;color:#f0f4ff;margin-bottom:4px">Export PDF Report</h2>
     <p style="font-size:12px;color:#5a7090;margin-bottom:24px">

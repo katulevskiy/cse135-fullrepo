@@ -101,7 +101,7 @@ renderNav('behavioral');
     </div>
 
     <!-- KPI row -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
+    <div class="kpi-grid">
         <?php
         $kpis = [
             ['Total Events', number_format($totalEvents), '#4f8ef7'],

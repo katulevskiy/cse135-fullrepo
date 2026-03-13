@@ -184,40 +184,53 @@ function pageHead(string $title, string $extraCss = ''): void {
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, -apple-system, sans-serif; background: #0f1623; color: #c8d6e8; min-height: 100vh; }
-        nav { background: #1a2133; border-bottom: 1px solid #2a3448; display: flex; align-items: center; padding: 0 28px; height: 54px; gap: 4px; flex-wrap: wrap; }
-        .nav-brand { display: flex; align-items: center; gap: 8px; margin-right: 20px; text-decoration: none; }
-        .nav-brand-icon { width: 28px; height: 28px; background: #4f8ef7; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        /* ── Nav ────────────────────────────────────────────────────────── */
+        nav { background: #1a2133; border-bottom: 1px solid #2a3448; display: flex; align-items: center; padding: 0 24px; min-height: 54px; gap: 2px; flex-wrap: wrap; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; margin-right: 16px; text-decoration: none; padding: 8px 4px; flex-shrink: 0; }
+        .nav-brand-icon { width: 28px; height: 28px; background: #4f8ef7; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .nav-brand-icon svg { width: 15px; height: 15px; fill: #fff; }
         .nav-brand-text { font-size: 14px; font-weight: 600; color: #e2e8f0; }
-        nav a { text-decoration: none; font-size: 13.5px; color: #7a8fa6; padding: 6px 12px; border-radius: 6px; transition: background 0.12s, color 0.12s; }
+        nav a { text-decoration: none; font-size: 13px; color: #7a8fa6; padding: 6px 10px; border-radius: 6px; transition: background 0.12s, color 0.12s; white-space: nowrap; }
         nav a:hover { background: #232d42; color: #c8d6e8; }
         nav a.active { background: #1e2d4a; color: #4f8ef7; font-weight: 500; }
-        .nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-        .nav-user { font-size: 13px; color: #5a7090; }
+        .nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: nowrap; }
+        .nav-user { font-size: 12px; color: #5a7090; white-space: nowrap; }
         .nav-role { background: #2a3448; border-radius: 4px; padding: 1px 6px; font-size: 11px; color: #7a8fa6; }
         nav a.logout { color: #f87171; }
         nav a.logout:hover { background: #2d1a1a; color: #f87171; }
-        .content { padding: 32px 36px; max-width: 1400px; margin: 0 auto; }
+
+        /* ── Layout ─────────────────────────────────────────────────────── */
+        .content { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
         h1 { font-size: 20px; font-weight: 600; color: #f0f4ff; margin-bottom: 4px; }
-        .page-sub { font-size: 13px; color: #5a7090; margin-bottom: 28px; }
-        .card { background: #1a2133; border: 1px solid #2a3448; border-radius: 10px; padding: 24px; }
+        .page-sub { font-size: 13px; color: #5a7090; margin-bottom: 24px; }
+
+        /* ── Cards ──────────────────────────────────────────────────────── */
+        .card { background: #1a2133; border: 1px solid #2a3448; border-radius: 10px; padding: 24px; min-width: 0;}
         .card-title { font-size: 14px; font-weight: 600; color: #e2e8f0; margin-bottom: 4px; }
         .card-sub { font-size: 12px; color: #5a7090; margin-bottom: 16px; }
-        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px; }
+
+        /* ── Charts grid ────────────────────────────────────────────────── */
+        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;}
         .charts-grid.three { grid-template-columns: repeat(3, 1fr); }
-        @media (max-width: 900px) { .charts-grid, .charts-grid.three { grid-template-columns: 1fr; } }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { text-align: left; padding: 10px 12px; background: #131d2e; color: #7a8fa6; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #2a3448; }
+
+        /* ── Tables (scrollable wrapper) ────────────────────────────────── */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
+        th { text-align: left; padding: 10px 12px; background: #131d2e; color: #7a8fa6; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #2a3448; white-space: nowrap; }
         td { padding: 9px 12px; border-bottom: 1px solid #1e2a3a; color: #c8d6e8; vertical-align: top; }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #1e2a3a; }
-        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; text-decoration: none; transition: background 0.12s; }
+
+        /* ── Buttons ────────────────────────────────────────────────────── */
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; text-decoration: none; transition: background 0.12s; white-space: nowrap; }
         .btn-primary { background: #4f8ef7; color: #fff; }
         .btn-primary:hover { background: #3b7de8; }
         .btn-secondary { background: #2a3448; color: #c8d6e8; }
         .btn-secondary:hover { background: #344057; }
         .btn-danger { background: #7c2d2d; color: #f87171; }
         .btn-danger:hover { background: #9b3333; }
+
+        /* ── Badges ─────────────────────────────────────────────────────── */
         .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
         .badge-visitor { background: #1a3a5c; color: #60a5fa; }
         .badge-performance { background: #1a3a2c; color: #34d399; }
@@ -225,11 +238,41 @@ function pageHead(string $title, string $extraCss = ''): void {
         .badge-super_admin { background: #3a1a3a; color: #e879f9; }
         .badge-analyst { background: #1a2a3a; color: #60a5fa; }
         .badge-viewer { background: #2a2a1a; color: #fbbf24; }
-        textarea { width: 100%; background: #0f1623; border: 1px solid #2a3448; border-radius: 6px; padding: 10px 13px; font-size: 13px; color: #e2e8f0; outline: none; resize: vertical; min-height: 100px; font-family: system-ui, -apple-system, sans-serif; }
+
+        /* ── Forms ──────────────────────────────────────────────────────── */
+        textarea { width: 100%; background: #0f1623; border: 1px solid #2a3448; border-radius: 6px; padding: 10px 13px; font-size: 13px; color: #e2e8f0; outline: none; resize: vertical; min-height: 100px; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box; }
         textarea:focus { border-color: #4f8ef7; }
         .alert { padding: 10px 16px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; }
         .alert-success { background: #1a3a2c; border: 1px solid #2d6a4a; color: #34d399; }
         .alert-error { background: #2d1a1a; border: 1px solid #7c2d2d; color: #f87171; }
+
+        /* ── Responsive breakpoints ─────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .charts-grid, .charts-grid.three { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            nav { padding: 8px 16px; gap: 2px; }
+            .nav-brand { margin-right: 8px; }
+            .nav-right { margin-left: 0; width: 100%; padding: 4px 0 6px; border-top: 1px solid #2a3448; justify-content: flex-start; }
+            .content { padding: 16px; }
+            h1 { font-size: 18px; }
+            .card { padding: 16px; }
+            .charts-grid { gap: 14px; }
+        }
+        /* KPI stat grid — fluid, auto-wraps */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 20px; }
+        .kpi-card { background: #131d2e; border: 1px solid #2a3448; border-radius: 8px; padding: 14px 16px; }
+        .kpi-label { font-size: 11px; color: #5a7090; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+        .kpi-value { font-size: 22px; font-weight: 700; }
+
+        @media (max-width: 480px) {
+            nav a { font-size: 12px; padding: 5px 8px; }
+            .nav-brand-text { display: none; }
+            .content { padding: 12px; }
+            .card { padding: 12px; }
+            .btn { padding: 7px 12px; font-size: 12px; }
+            .kpi-grid { gap: 10px; }
+        }
         ' . $extraCss . '
     </style>
     <script>

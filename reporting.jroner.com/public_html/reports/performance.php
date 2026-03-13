@@ -131,8 +131,8 @@ renderNav('performance');
         <button class="btn btn-secondary" onclick="openExportModal()">Export PDF</button>
     </div>
 
-    <!-- KPI cards — now 4 including median -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px">
+    <!-- KPI cards -->
+    <div class="kpi-grid">
         <?php
         $kpis = [
             ['Avg Load Time',    number_format($overallAvg) . 'ms',    $overallAvg    < 1000 ? '#34d399' : ($overallAvg    < 3000 ? '#fbbf24' : '#f87171')],
