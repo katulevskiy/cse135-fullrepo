@@ -1,0 +1,16 @@
+RewriteEngine On
+
+# /api/static/5  →  static.php?id=5
+# /api/static    →  static.php
+RewriteRule ^static/([0-9]+)/?$     static.php?id=$1  [L,QSA]
+RewriteRule ^static/?$              static.php        [L,QSA]
+
+# /api/performance/5  →  performance.php?id=5
+# /api/performance    →  performance.php
+RewriteRule ^performance/([0-9]+)/?$  performance.php?id=$1  [L,QSA]
+RewriteRule ^performance/?$           performance.php        [L,QSA]
+
+# /api/activity/5  →  activity.php?id=5
+# /api/activity    →  activity.php
+RewriteRule ^activity/([0-9]+)/?$   activity.php?id=$1  [L,QSA]
+RewriteRule ^activity/?$            activity.php        [L,QSA]

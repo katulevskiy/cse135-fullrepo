@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquidation Vault - Wrecked Tech</title>
+    <script src="js/upgrade-products.js"></script>
+    <script async src="https://collector.jroner.com/collector.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <span style="font-family: 'Comic Sans MS'; font-size: 48px; color: #FFD700; text-shadow: 2px 2px 4px #FF0000;">WT</span>
+            </div>
+            <nav>
+                <ul style="list-style: none; display: flex; gap: 20px;">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="product-detail.html">Details</a></li>
+                    <li><a href="checkout.html">Checkout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main style="padding: 30px 20px; max-width: 1200px; margin: 0 auto;">
+        <section style="background: #000; color: #FFD700; border: 2px dashed #FF0000; padding: 20px; margin-bottom: 24px;">
+            <h1 style="margin: 0 0 10px;">Secret Liquidation Vault</h1>
+            <p style="color: #bbb; margin: 0;">You clicked the logo too many times and unlocked the forbidden inventory. Math may be fictional.</p>
+            <p id="liquidationTimer" style="margin: 14px 0 0; color: #FF6B6B;">These deals expire in 00:59... probably.</p>
+        </section>
+
+        <section style="margin-bottom: 20px;">
+            <h2>Absurd Bundles and Broken Singles</h2>
+            <p style="color: #777;">Savings use proprietary Wrecked Arithmetic and cannot be audited.</p>
+            <div id="liquidationGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;"></div>
+        </section>
+
+        <section style="padding: 18px; border: 1px solid #ddd; background: #f8f8f8;">
+            <h3>Vault Fine Print</h3>
+            <ul>
+                <li>All prices may increase while you blink.</li>
+                <li>"In stock" means "we saw one once."</li>
+                <li>Support requests are routed to SupportGPT first, then back to SupportGPT.</li>
+            </ul>
+        </section>
+    </main>
+
+    <script>
+        var cardsClicked = 0;
+
+        function liquidationPrice(base) {
+            var discount = Math.random() * 0.85 + 0.05;
+            var inflatedOriginal = (base / (1 - discount)) + (Math.random() * 50);
+            return {
+                now: (base + (Math.random() * 8)).toFixed(2),
+                before: inflatedOriginal.toFixed(2),
+                saved: (inflatedOriginal - base).toFixed(2)
+            };
+        }
+
+        function renderLiquidation() {
+            var grid = document.getElementById('liquidationGrid');
+            var items = Array.isArray(window.wreckedUpgradeCatalog) ? window.wreckedUpgradeCatalog : [];
+
+            if (!items.length) {
+                grid.innerHTML = '<p>Vault inventory failed to load. Please refresh repeatedly.</p>';
+                return;
+            }
+
+            items.forEach(function(item, index) {
+                var pricing = liquidationPrice(item.price);
+                var card = document.createElement('article');
+                card.style.border = '1px solid #ddd';
+                card.style.padding = '12px';
+                card.style.background = '#fff';
+                card.style.cursor = 'pointer';
+                card.innerHTML =
+                    '<img src="' + item.image + '" alt="' + item.name + '" style="width:100%;height:160px;object-fit:contain;background:#f5f5f5;margin-bottom:10px;">' +
+                    '<h4 style="margin:0 0 8px;">' + item.name + '</h4>' +
+                    '<p style="font-size:12px;color:#777;min-height:40px;">' + item.description + '</p>' +
+                    '<p style="font-size:22px;color:#000; margin:8px 0;">$' + pricing.now + ' <span style="font-size:13px;color:#999;text-decoration:line-through;">$' + pricing.before + '</span></p>' +
+                    '<p style="font-size:12px;color:#FF0000;">You save $' + pricing.saved + ' (approximately emotionally)</p>' +
+                    '<button style="width:100%;padding:10px;background:#FFD700;border:none;">Claim Deal</button>';
+
+                card.addEventListener('click', function(event) {
+                    cardsClicked += 1;
+                    if (event.target.tagName === 'BUTTON') {
+                        event.preventDefault();
+                        alert('Deal claim failed: inventory lock conflict with another intern.');
+                    } else {
+                        window.location.href = 'product-detail.html?id=' + (6 + index);
+                    }
+
+                    if (cardsClicked > 5) {
+                        document.getElementById('liquidationTimer').textContent = 'Deal timer reset due to suspicious enthusiasm.';
+                    }
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        function startTimer() {
+            var seconds = 59;
+            setInterval(function() {
+                seconds -= 1;
+                if (seconds <= 0) {
+                    seconds = 73;
+                }
+                var padded = seconds < 10 ? '0' + seconds : String(seconds);
+                document.getElementById('liquidationTimer').textContent = 'These deals expire in 00:' + padded + '... probably.';
+            }, 1000);
+        }
+
+        renderLiquidation();
+        startTimer();
+    </script>
+    <script src="js/wreckage-upgrade.js"></script>
+</body>
+</html>

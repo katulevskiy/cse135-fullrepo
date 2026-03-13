@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="620" viewBox="0 0 620 620" role="img" aria-label="AI Spoon">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#451a03"/><stop offset="100%" stop-color="#92400e"/></linearGradient></defs>
+  <rect width="620" height="620" fill="url(#g)"/>
+  <rect x="16" y="16" width="588" height="588" rx="14" fill="rgba(0,0,0,0.26)" stroke="#FFD700" stroke-width="3"/>
+  <text x="30" y="62" fill="#FFD700" font-size="30" font-family="Comic Sans MS, cursive">Wrecked Tech</text>
+  <text x="30" y="300" fill="#fff" font-size="30" font-family="Comic Sans MS, cursive">AI Spoon</text>
+  <text x="30" y="338" fill="#ffe6a3" font-size="18" font-family="Comic Sans MS, cursive">Needs Wi-Fi to stir.</text>
+</svg>

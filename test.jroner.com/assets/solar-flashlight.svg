@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="780" viewBox="0 0 520 780" role="img" aria-label="Solar Flashlight">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1f2937"/><stop offset="100%" stop-color="#0f766e"/></linearGradient></defs>
+  <rect width="520" height="780" fill="url(#g)"/>
+  <rect x="16" y="16" width="488" height="748" rx="12" fill="rgba(0,0,0,0.26)" stroke="#FFD700" stroke-width="3"/>
+  <text x="28" y="58" fill="#FFD700" font-size="28" font-family="Comic Sans MS, cursive">Wrecked Tech</text>
+  <text x="28" y="380" fill="#fff" font-size="28" font-family="Comic Sans MS, cursive">Solar Flashlight</text>
+  <text x="28" y="414" fill="#ffe6a3" font-size="16" font-family="Comic Sans MS, cursive">Night mode unsupported.</text>
+</svg>

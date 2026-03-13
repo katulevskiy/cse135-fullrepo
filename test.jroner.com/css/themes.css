@@ -1,0 +1,178 @@
+/* Themes.css - Theme styles for themes that were never selected */
+
+/* Dark theme for users who never enabled it */
+.theme-dark-unused {
+    --primary-color: #000000;
+    --secondary-color: #111111;
+    --text-color: #222222;
+    --background-color: #333333;
+    --error-color: #444444;
+    --success-color: #555555;
+}
+
+.theme-dark-unused body {
+    background: var(--background-color);
+    color: var(--text-color);
+    filter: invert(1) hue-rotate(180deg);
+}
+
+/* Light theme that's too bright */
+.theme-blinding-light {
+    --primary-color: #FFFFFF;
+    --secondary-color: #FFFFFE;
+    --text-color: #FFFFFD;
+    --background-color: #FFFFFC;
+    --error-color: #FFFFFB;
+    --success-color: #FFFFFA;
+}
+
+/* Vaporwave theme nobody asked for */
+.theme-vaporwave-aesthetic {
+    --primary-color: #FF00FF;
+    --secondary-color: #00FFFF;
+    --accent-color: #FF00AA;
+    --background: linear-gradient(180deg, #FF00FF, #00FFFF);
+    --text-shadow: 3px 3px 0px #00FFFF, -3px -3px 0px #FF00FF;
+}
+
+.theme-vaporwave-aesthetic * {
+    font-family: 'Comic Sans MS' !important;
+    text-shadow: var(--text-shadow);
+    animation: vaporwaveGlow 2s infinite;
+}
+
+@keyframes vaporwaveGlow {
+    0%, 100% { filter: hue-rotate(0deg); }
+    50% { filter: hue-rotate(180deg); }
+}
+
+/* Matrix theme for hackers */
+.theme-matrix-hacker {
+    --primary-color: #00FF00;
+    --background-color: #000000;
+    --text-color: #00FF00;
+    --font-family: 'Courier New', monospace;
+}
+
+.theme-matrix-hacker::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 0, 0.03),
+        rgba(0, 255, 0, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 99999;
+}
+
+/* Disco theme with animations */
+.theme-disco-fever {
+    animation: discoColors 1s infinite;
+}
+
+@keyframes discoColors {
+    0% { background: red; }
+    20% { background: orange; }
+    40% { background: yellow; }
+    60% { background: green; }
+    80% { background: blue; }
+    100% { background: purple; }
+}
+
+/* Minimalist theme that's too minimal */
+.theme-ultra-minimal * {
+    border: none !important;
+    background: transparent !important;
+    color: #ccc !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+}
+
+/* Broken theme that breaks everything */
+.theme-completely-broken {
+    transform: rotate(1deg);
+}
+
+.theme-completely-broken * {
+    position: relative !important;
+    top: 1px !important;
+    left: 1px !important;
+}
+
+/* Halloween theme in January */
+.theme-halloween-forever {
+    --primary-color: #FF6600;
+    --secondary-color: #000000;
+    --accent-color: #8B0000;
+    --spider-web: url('data:image/svg+xml,...');
+}
+
+.theme-halloween-forever::after {
+    content: '🎃';
+    position: fixed;
+    font-size: 100px;
+    animation: floatingPumpkin 10s infinite;
+}
+
+@keyframes floatingPumpkin {
+    0%, 100% { 
+        top: -100px;
+        left: -100px;
+    }
+    50% {
+        top: 50%;
+        left: 50%;
+        transform: rotate(360deg);
+    }
+}
+
+/* Christmas theme in July */
+.theme-xmas-in-summer {
+    --primary-color: #FF0000;
+    --secondary-color: #00FF00;
+    --snow-color: #FFFFFF;
+}
+
+.theme-xmas-in-summer::before {
+    content: '';
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml,...') repeat;
+    animation: snowfall 10s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes snowfall {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(100%); }
+}
+
+/* Retro 90s theme */
+.theme-90s-nostalgia {
+    background: linear-gradient(45deg, 
+        #FF00FF, #00FFFF, #FFFF00, #FF00FF);
+    background-size: 400% 400%;
+    animation: gradient90s 5s ease infinite;
+}
+
+@keyframes gradient90s {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Invisible theme */
+.theme-invisible * {
+    opacity: 0.01 !important;
+}
+
+.theme-invisible *:hover {
+    opacity: 0.02 !important;
+}

@@ -1,0 +1,130 @@
+/* Reset.css - Resetting things that don't need resetting */
+
+#non-existent-nav ul li a:hover:after:before {
+    content: '';
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    outline: 0 !important;
+    font-size: 100% !important;
+    vertical-align: baseline !important;
+    background: transparent !important;
+}
+
+.phantom-sidebar-widget * {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-weight: inherit;
+    font-style: inherit;
+    font-size: 100%;
+    font-family: inherit;
+    vertical-align: baseline;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+}
+
+#ghost-footer-section article,
+#ghost-footer-section aside,
+#ghost-footer-section details,
+#ghost-footer-section figcaption,
+#ghost-footer-section figure,
+#ghost-footer-section footer,
+#ghost-footer-section header,
+#ghost-footer-section hgroup,
+#ghost-footer-section menu,
+#ghost-footer-section nav,
+#ghost-footer-section section {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.deleted-carousel-wrapper ol,
+.deleted-carousel-wrapper ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.missing-testimonials blockquote,
+.missing-testimonials q {
+    quotes: none;
+}
+
+.missing-testimonials blockquote:before,
+.missing-testimonials blockquote:after,
+.missing-testimonials q:before,
+.missing-testimonials q:after {
+    content: '';
+    content: none;
+}
+
+#table-that-never-existed {
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.imaginary-form-wrapper input,
+.imaginary-form-wrapper select,
+.imaginary-form-wrapper textarea,
+.imaginary-form-wrapper button {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Reset animations for elements that don't exist */
+@keyframes resetAnimation {
+    0%, 100% {
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+}
+
+.never-used-animation-class {
+    animation: resetAnimation 10s infinite;
+}
+
+/* Reset transforms for phantom elements */
+.transform-reset-1 { transform: none !important; }
+.transform-reset-2 { transform: translate(0, 0) !important; }
+.transform-reset-3 { transform: rotate(0deg) !important; }
+.transform-reset-4 { transform: scale(1, 1) !important; }
+.transform-reset-5 { transform: skew(0deg, 0deg) !important; }
+
+/* Reset flexbox for containers that were removed */
+.old-flex-container {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    align-content: stretch !important;
+}
+
+/* Reset grid for layouts never implemented */
+.planned-grid-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr !important;
+    grid-gap: 0 !important;
+    grid-auto-flow: row !important;
+}

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V8M0H17H6Q"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-V8M0H17H6Q');
+    </script>
+    <meta charset="UTF-8">
+    <title>Echo Form</title>
+</head>
+
+<body>
+    <div class="js-required">
+    <h1>Echo Form</h1>
+
+    <form id="echoForm" method="POST" action="../cgi-bin/hw2/python/echo.py">
+        <fieldset>
+            <legend>Endpoint Settings</legend>
+
+            <label>Language:
+                <select id="language">
+                    <option value="php">PHP</option>
+                    <option value="python">Python</option>
+                    <option value="go">Go</option>
+                </select>
+            </label>
+            <br><br>
+
+            <label>Method:
+                <select id="method">
+                    <option value="GET">GET</option>
+                    <option value="POST" selected>POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+            </label>
+            <br><br>
+
+            <label>Encoding:
+                <select id="encoding">
+                    <option value="urlencoded">application/x-www-form-urlencoded</option>
+                    <option value="json">application/json</option>
+                </select>
+            </label>
+        </fieldset>
+
+        <br>
+
+        <fieldset>
+            <legend>Data Fields</legend>
+            <label>Name: <input type="text" name="name"></label><br><br>
+            <label>Message: <input type="text" name="message"></label><br><br>
+            <label>ID: <input type="number" name="id"></label>
+        </fieldset>
+
+        <br>
+        <label>Use Fetch and display response (GET/POST only if disabled):<input type="checkbox" id="fetchButton" checked></label><br><br>
+        <button type="submit">Send Request</button>
+        
+    </form>
+
+    <h2>Response From Endpoint:</h2>
+    <pre id="responseBox">Response will appear here (with Fetch enabled).</pre>
+    </div>
+
+    <noscript>
+        <p><strong>Note:</strong> JavaScript is disabled. Use the forms below to submit your request based on endpoint settings.</p>
+
+        <style>
+            .js-required {
+                display: none;
+            }
+        </style>
+
+        <h1>Echo PHP Form</h1>
+
+        <form id="echoPHPForm" method="POST" action="../cgi-bin/hw2/php/echo.php">
+            <fieldset>
+                <legend>Data Fields</legend>
+                <label>Name: <input type="text" name="php-name"></label><br><br>
+                <label>Message: <input type="text" name="php-message"></label><br><br>
+                <label>ID: <input type="number" name="php-id"></label>
+            </fieldset>
+
+            <br>
+            <button type="submit">Send Request</button>
+            
+        </form>
+
+
+        <h1>Echo Python Form</h1>
+
+        <form id="echoPythonForm" method="POST" action="../cgi-bin/hw2/python/echo.py">
+            <fieldset>
+                <legend>Data Fields</legend>
+                <label>Name: <input type="text" name="python-name"></label><br><br>
+                <label>Message: <input type="text" name="python-message"></label><br><br>
+                <label>ID: <input type="number" name="python-id"></label>
+            </fieldset>
+
+            <br>
+            <button type="submit">Send Request</button>
+            
+        </form>
+
+
+        <h1>Echo GO Form</h1>
+
+        <form id="echoGOForm" method="POST" action="../cgi-bin/hw2/go/echo">
+            <fieldset>
+                <legend>Data Fields</legend>
+                <label>Name: <input type="text" name="go-name"></label><br><br>
+                <label>Message: <input type="text" name="go-message"></label><br><br>
+                <label>ID: <input type="number" name="go-id"></label>
+            </fieldset>
+
+            <br>
+            <button type="submit">Send Request</button>
+            
+        </form>
+    </noscript>
+
+<script>
+    document.getElementById("echoForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // prevent normal form submission
+
+    const language = document.getElementById("language").value;
+    const method = document.getElementById("method").value;
+    const encoding = document.getElementById("encoding").value;
+
+    const endpointMap = {
+        php: "../cgi-bin/hw2/php/echo.php",
+        python: "../cgi-bin/hw2/python/echo.py",
+        go: "../cgi-bin/hw2/go/echo"
+    };
+
+    const url = endpointMap[language];
+    const formData = new FormData(event.target);
+    const responseBox = document.getElementById("responseBox");
+
+    let fetchOptions = { method: method, headers: {} };
+
+    if (encoding === "json") {
+        let obj = {};
+        formData.forEach((value, key) => obj[key] = value);
+        fetchOptions.headers["Content-Type"] = "application/json";
+        fetchOptions.body = JSON.stringify(obj);
+    } else {
+        fetchOptions.headers["Content-Type"] = "application/x-www-form-urlencoded";
+        fetchOptions.body = new URLSearchParams(formData).toString();
+    }
+
+
+    const useFetch = document.getElementById("fetchButton").checked;
+    if (!useFetch) {
+        event.target.method = method;
+        event.target.action = endpointMap[language];
+        event.target.submit();
+        return;
+    }
+
+    // GET requests shouldn't have a body
+    if (method === "GET") {
+        const queryString = new URLSearchParams(formData).toString();
+        fetch(url + "?" + queryString)
+            .then(res => res.text())
+            .then(text => responseBox.textContent = text)
+            .catch(err => responseBox.textContent = "Error: " + err);
+    } else {
+        fetch(url, fetchOptions)
+            .then(res => res.text())
+            .then(text => responseBox.textContent = text)
+            .catch(err => responseBox.textContent = "Error: " + err);
+    }
+});
+</script>
+
+</body>
+</html>

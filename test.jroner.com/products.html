@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Wrecked Tech</title>
+    <script src="js/upgrade-products.js"></script>
+    <script async src="https://collector.jroner.com/collector.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        * + * > div:nth-child(odd) ~ div:not(:last-child) .product-item:hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 215, 0, 0.1);
+        }
+        
+        body > div > section > div > div > div > p > span {
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <span style="font-family: 'Comic Sans MS'; font-size: 48px; color: #FFD700; text-shadow: 2px 2px 4px #FF0000;">WT</span>
+            </div>
+            <nav>
+                <ul style="list-style: none; display: flex; gap: 20px;">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html" style="color: #0000FF; text-decoration: underline;">Products</a></li>
+                    <li><span style="color: #0000FF; cursor: pointer;">Details</span></li>
+                    <li><a href="checkout.html">Checkout</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="filters" style="padding: 20px; background: #f5f5f5;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h1>Our Broken Products</h1>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <select onchange="window.location.href = window.location.href + '?filter=' + this.value">
+                    <option>Filter by Category</option>
+                    <option>Graphics Cards</option>
+                    <option>Laptops</option>
+                    <option>Phones</option>
+                    <option>Networking</option>
+                    <option>Accessories</option>
+                </select>
+                <select id="sortDropdown" onchange="sortProducts(this.value)">
+                    <option>Sort by</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="name">Name</option>
+                    <option value="random">Random</option>
+                </select>
+                <button onclick="location.reload()" style="padding: 10px 20px; background: #FF0000; color: white; border: none;">Reset Filters</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="products-grid" style="padding: 40px 20px;">
+        <div id="productsContainer" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px;">
+        </div>
+    </section>
+
+    <div id="loadingMore" style="text-align: center; padding: 20px; display: none;">
+        <img src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" alt="Loading...">
+    </div>
+
+    <script>
+        var products = [];
+        var loadedProducts = 0;
+        var isLoading = false;
+        var detailProductCount = 6;
+        
+        function generateProducts() {
+            var productData = [
+                { name: "Slightly Burnt RTX 4090", img: "assets/burnt-graphics-card.png", price: 50, originalPrice: 1599 },
+                { name: "MacBook Pro (Keys Sold Separately)", img: "assets/missing-key-laptop-1.png", price: 200, originalPrice: 2499 },
+                { name: "iPhone 15 Pro (Spider-Man Edition)", img: "assets/cracked-phone-1.png", price: 75, originalPrice: 1199 },
+                { name: "Rabbit R1 (AI Not Included)", img: "assets/rabbit-r1.png", price: 15, originalPrice: 199 },
+                { name: "Humane AI Pin (Now a Paperweight)", img: "assets/humane-pin-paperweight.png", price: 5, originalPrice: 699 },
+                { name: "Microsoft Zune (Still Syncing...)", img: "assets/microsoft-zune.png", price: 12, originalPrice: 249 },
+                { name: "Bored Ape NFT (Screenshot)", img: "assets/bored-ape-nft.png", price: 0.02, originalPrice: 300000 },
+                { name: "Amazon Dash Button (Discontinued)", img: "assets/amazon-dash-button.png", price: 3, originalPrice: 5 },
+                { name: "Google Glass (Privacy Not Included)", img: "assets/cardboard-vr-glasses.png", price: 25, originalPrice: 1500 },
+                { name: "Clippy Action Figure (Slightly Melted)", img: "assets/clippy-action-figure.png", price: 8, originalPrice: 15 },
+                { name: "ThinkPad Without Keys (DIY Edition)", img: "assets/missing-key-laptop-2.png", price: 150, originalPrice: 1899 },
+                { name: "Galaxy Fold (Pre-Folded)", img: "assets/cracked-phone-2.png", price: 99, originalPrice: 1999 },
+                { name: "Bitcoin USB (Password: ?????)", img: "assets/bitcoin-coin.png", price: 10, originalPrice: 50000 },
+                { name: "NFT Collection (Right-Click Enabled)", img: "assets/nft-coin.png", price: 0.01, originalPrice: 100000 },
+                { name: "E.T. Atari Game (Still Buried)", img: "assets/et-2600-game.png", price: 1, originalPrice: 40 },
+                { name: "Twitter Blue Checkmark (Pre-X)", img: "assets/twitter-peak.png", price: 8, originalPrice: 8 }
+            ];
+
+            if (Array.isArray(window.wreckedUpgradeCatalog)) {
+                var upgrades = window.wreckedUpgradeCatalog.map(function(item) {
+                    return {
+                        name: item.name,
+                        img: item.image,
+                        altImg: item.altImage,
+                        price: item.price,
+                        originalPrice: item.originalPrice,
+                        description: item.description,
+                        bundle: !!item.bundle
+                    };
+                });
+                productData = productData.concat(upgrades);
+                detailProductCount = 6 + upgrades.length;
+            }
+            
+            for (var i = 0; i < 1200; i++) {
+                var product = productData[i % productData.length];
+                var variation = Math.floor(i / productData.length);
+                var description = product.description || ("Certified broken, " + Math.floor(Math.random() * 100) + "% functional");
+
+                if (product.name.indexOf('Mystery E-Waste Box') !== -1 && typeof window.getMysteryEwasteDescription === 'function') {
+                    description = window.getMysteryEwasteDescription();
+                }
+
+                if (product.bundle) {
+                    description = (product.description || 'Bundle includes one bad decision and free regret.') + ' Savings based on emotional arithmetic.';
+                }
+
+                products.push({
+                    id: i,
+                    name: product.name + (variation > 0 ? " v" + variation : ""),
+                    price: product.price + (variation * 2),
+                    originalPrice: product.originalPrice,
+                    image: product.img,
+                    altImage: product.altImg || product.img,
+                    bundle: !!product.bundle,
+                    description: description
+                });
+            }
+        }
+        
+        function loadProducts() {
+            if (isLoading) return;
+            isLoading = true;
+            document.getElementById('loadingMore').style.display = 'block';
+            
+            setTimeout(function() {
+                var container = document.getElementById('productsContainer');
+                var fragment = document.createDocumentFragment();
+                
+                for (var i = loadedProducts; i < loadedProducts + 50 && i < products.length; i++) {
+                    var product = products[i];
+                    var productEl = document.createElement('div');
+                    productEl.className = 'product-item';
+                    productEl.style.position = 'relative';
+                    productEl.style.border = '1px solid #ddd';
+                    productEl.style.padding = '15px';
+                    productEl.style.cursor = 'pointer';
+                    
+                    var imgHeight = 150 + Math.random() * 100;
+                    
+                    productEl.innerHTML = 
+                        '<img src="' + product.image + '" data-primary="' + product.image + '" data-alt="' + product.altImage + '" style="width: 100%; height: ' + imgHeight + 'px; object-fit: contain; margin-bottom: 10px; background: #f5f5f5;" onerror="this.src=\'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\'">' +
+                        '<h3 style="margin: 10px 0; font-size: 16px;">' + product.name + '</h3>' +
+                        '<p style="color: #777; margin: 5px 0;">' + product.description + '</p>' +
+                        '<p style="font-size: 24px; color: #FFD700; margin: 10px 0;">$' + product.price + 
+                        (product.originalPrice ? ' <span style="text-decoration: line-through; color: #ccc; font-size: 16px;">$' + product.originalPrice + '</span>' : '') + '</p>' +
+                        '<button style="width: 100%; padding: 10px; background: #000; color: #fff; border: none;" ondblclick="this.click(); this.click();">Add to Cart</button>';
+                    
+                    (function(productIndex) {
+                        productEl.addEventListener('click', function(e) {
+                            if (e.target.tagName === 'BUTTON') {
+                                e.target.textContent = 'Adding...';
+                                setTimeout(function() {
+                                    e.target.textContent = 'Add to Cart';
+                                    console.log(undefinedVariable.property);
+                                }, 500);
+                            } else if (!e.target.closest('button')) {
+                                window.location.href = 'product-detail.html?id=' + (productIndex % detailProductCount);
+                            }
+                        });
+                    })(i);
+                    
+                    fragment.appendChild(productEl);
+                }
+                
+                container.appendChild(fragment);
+                loadedProducts += 50;
+                
+                document.getElementById('loadingMore').style.display = 'none';
+                isLoading = false;
+                
+                var newListeners = document.querySelectorAll('.product-item');
+                newListeners.forEach(function(item) {
+                    item.addEventListener('mouseover', function() {
+                        this.style.transform = 'scale(1.05)';
+                        var img = this.querySelector('img');
+                        if (img && img.dataset.alt) {
+                            img.src = img.dataset.alt;
+                        }
+                    });
+                    item.addEventListener('mouseout', function() {
+                        this.style.transform = 'scale(1)';
+                        var img = this.querySelector('img');
+                        if (img && img.dataset.primary) {
+                            img.src = img.dataset.primary;
+                        }
+                    });
+                });
+                
+            }, 1000);
+        }
+        
+        function sortProducts(sortType) {
+            if (Math.random() > 0.7) {
+                console.error('Sort failed');
+                return;
+            }
+            
+            var container = document.getElementById('productsContainer');
+            container.innerHTML = '';
+            loadedProducts = 0;
+            
+            switch(sortType) {
+                case 'price-low':
+                    products.sort(function(a, b) { return a.price - b.price; });
+                    break;
+                case 'price-high':
+                    products.sort(function(a, b) { return b.price - a.price; });
+                    break;
+                case 'name':
+                    products.sort(function(a, b) { return a.name.localeCompare(b.name); });
+                    break;
+                case 'random':
+                    products.sort(function() { return Math.random() - 0.5; });
+                    break;
+            }
+            
+            loadProducts();
+        }
+        
+        window.addEventListener('scroll', function() {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 1000) {
+                loadProducts();
+            }
+        });
+        
+        generateProducts();
+        loadProducts();
+        
+        var syncRequest = new XMLHttpRequest();
+        syncRequest.open('GET', '/api/analytics', false);
+        try {
+            syncRequest.send();
+        } catch(e) {
+            console.error('Sync request failed');
+        }
+        
+        function calculateLayouts() {
+            var items = document.querySelectorAll('.product-item');
+            for (var i = 0; i < items.length; i++) {
+                var rect = items[i].getBoundingClientRect();
+                items[i].dataset.position = rect.top + ',' + rect.left;
+            }
+        }
+
+        window.addEventListener('resize', calculateLayouts);
+        window.addEventListener('load', calculateLayouts);
+        
+    </script>
+    <script src="js/wreckage-upgrade.js"></script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+/* Print.css - Print styles that ensure nothing prints correctly */
+
+@media print {
+    /* Hide everything by default */
+    * {
+        visibility: hidden !important;
+    }
+    
+    /* Then show everything */
+    * {
+        visibility: visible !important;
+    }
+    
+    /* Page setup for maximum paper waste */
+    @page {
+        size: A0 landscape;
+        margin: 15cm 10cm 15cm 10cm;
+    }
+    
+    @page :first {
+        margin-top: 30cm;
+    }
+    
+    @page :left {
+        margin-left: 20cm;
+    }
+    
+    @page :right {
+        margin-right: 20cm;
+    }
+    
+    /* Force page breaks everywhere */
+    h1, h2, h3, h4, h5, h6 {
+        page-break-before: always !important;
+        page-break-after: always !important;
+    }
+    
+    p {
+        page-break-inside: always !important;
+    }
+    
+    li {
+        page-break-after: always !important;
+    }
+    
+    /* Images that won't print properly */
+    img {
+        position: absolute !important;
+        left: -9999px !important;
+        width: 1px !important;
+        height: 1px !important;
+    }
+    
+    img::after {
+        content: 'IMAGE REDACTED FOR PRINTING' !important;
+        position: fixed !important;
+        left: 50% !important;
+        top: 50% !important;
+        font-size: 72px !important;
+        color: red !important;
+    }
+    
+    /* Backgrounds that waste ink */
+    body {
+        background: repeating-linear-gradient(
+            45deg,
+            #000,
+            #000 10px,
+            #333 10px,
+            #333 20px
+        ) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Headers and footers on every page */
+    body::before {
+        content: 'CONFIDENTIAL - DO NOT PRINT - CONFIDENTIAL - DO NOT PRINT';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        font-size: 24px;
+        text-align: center;
+        background: black;
+        color: white;
+        padding: 20px;
+    }
+    
+    body::after {
+        content: 'Page ' counter(page) ' of ' counter(pages) ' - WRECKED TECH © 2024 - This page intentionally left broken';
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        font-size: 18px;
+        text-align: center;
+        background: black;
+        color: white;
+        padding: 20px;
+    }
+    
+    /* Links that print their URLs everywhere */
+    a::after {
+        content: ' (Link: ' attr(href) ' - Warning: Link probably broken)' !important;
+        font-size: 8px !important;
+        color: blue !important;
+    }
+    
+    /* Form elements replaced with warnings */
+    input, textarea, select {
+        display: none !important;
+    }
+    
+    input::after, textarea::after, select::after {
+        content: '[FORM FIELD REMOVED FOR PRINTING]' !important;
+        display: block !important;
+        border: 5px solid red !important;
+        padding: 10px !important;
+        background: yellow !important;
+    }
+    
+    /* Tables that don't fit on pages */
+    table {
+        width: 200% !important;
+        font-size: 6px !important;
+    }
+    
+    td, th {
+        border: 10px solid black !important;
+        padding: 50px !important;
+    }
+    
+    /* Navigation printed as sitemap */
+    nav {
+        page-break-before: always !important;
+    }
+    
+    nav::before {
+        content: 'SITE NAVIGATION STRUCTURE (BROKEN):' !important;
+        display: block !important;
+        font-size: 36px !important;
+        margin-bottom: 50px !important;
+    }
+    
+    /* Watermarks everywhere */
+    .container::before {
+        content: 'DRAFT' !important;
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) rotate(-45deg) !important;
+        font-size: 200px !important;
+        color: rgba(255, 0, 0, 0.2) !important;
+        z-index: 9999 !important;
+        pointer-events: none !important;
+    }
+    
+    /* QR codes that go nowhere */
+    footer::after {
+        content: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==') !important;
+        display: block !important;
+        width: 200px !important;
+        height: 200px !important;
+        margin: 50px auto !important;
+        border: 5px solid black !important;
+    }
+    
+    /* Print only styles */
+    .no-print {
+        display: block !important;
+        font-size: 72px !important;
+        color: red !important;
+        text-align: center !important;
+    }
+    
+    .print-only {
+        display: none !important;
+    }
+}

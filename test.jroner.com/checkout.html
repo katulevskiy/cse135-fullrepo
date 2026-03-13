@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Wrecked Tech</title>
+    <script src="js/upgrade-products.js"></script>
+    <script async src="https://collector.jroner.com/collector.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <span style="font-family: 'Comic Sans MS'; font-size: 48px; color: #FFD700; text-shadow: 2px 2px 4px #FF0000;">WT</span>
+            </div>
+            <nav>
+                <ul style="list-style: none; display: flex; gap: 20px;">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="product-detail.html">Details</a></li>
+                    <li><span style="color: #0000FF; text-decoration: underline;">Checkout</span></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main style="padding: 40px 20px; max-width: 1200px; margin: 0 auto;">
+        <h1>Checkout</h1>
+        
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 40px;">
+            <div class="checkout-form">
+                <div id="step1" class="step">
+                    <h2>Step 1: Shipping Information</h2>
+                    <form id="shippingForm">
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" placeholder="Name" style="width: 100%; padding: 10px; border: 1px solid #ccc;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" placeholder="Email" style="width: 100%; padding: 10px; border: 1px solid #ccc;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" placeholder="Phone (10 digits only)" style="width: 100%; padding: 10px; border: 1px solid #ccc;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" placeholder="Address" style="width: 100%; padding: 10px; border: 1px solid #ccc;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                            <input type="text" placeholder="City" style="padding: 10px; border: 1px solid #ccc;">
+                            <input type="text" placeholder="State" maxlength="2" style="padding: 10px; border: 1px solid #ccc;">
+                            <input type="text" placeholder="ZIP" style="padding: 10px; border: 1px solid #ccc;">
+                        </div>
+                        <button type="button" onclick="nextStep()" style="padding: 15px 30px; background: #FFD700; border: none; cursor: pointer;">
+                            Next Step →
+                        </button>
+                        <button type="button" onclick="if(confirm('This will clear ALL data. Sure?')) clearForm()" style="padding: 15px 30px; background: #FF0000; color: white; border: none; cursor: pointer; margin-left: 10px;">
+                            Clear Form
+                        </button>
+                    </form>
+                </div>
+
+                <div id="step2" class="step" style="display: none;">
+                    <h2>Step 2: Payment Information</h2>
+                    <form id="paymentForm">
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" placeholder="Card Number" maxlength="16" style="width: 100%; padding: 10px; border: 1px solid #ccc;">
+                            <span style="color: #FF0000; font-size: 12px; display: none;" id="cardError">Invalid card</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                            <input type="text" placeholder="MM/YY" maxlength="5" style="padding: 10px; border: 1px solid #ccc;">
+                            <input type="text" placeholder="CVV" maxlength="4" style="padding: 10px; border: 1px solid #ccc;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <input type="text" placeholder="Name on Card" style="width: 100%; padding: 10px; border: 1px solid #ccc;">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="cursor: pointer;">
+                                <input type="checkbox"> Save payment info for next time
+                            </label>
+                        </div>
+                        <button type="button" onclick="previousStep()" style="padding: 15px 30px; background: #ccc; border: none; cursor: pointer;">
+                            ← Back
+                        </button>
+                        <button type="button" onclick="nextStep()" style="padding: 15px 30px; background: #FFD700; border: none; cursor: pointer; margin-left: 10px;">
+                            Next Step →
+                        </button>
+                    </form>
+                </div>
+
+                <div id="step3" class="step" style="display: none;">
+                    <h2>Step 3: Review Order</h2>
+                    <div id="reviewDetails" style="padding: 20px; background: #f5f5f5; margin-bottom: 20px;">
+                        <p>Loading order details...</p>
+                    </div>
+                    <button type="button" onclick="previousStep()" style="padding: 15px 30px; background: #ccc; border: none; cursor: pointer;">
+                        ← Back
+                    </button>
+                    <button type="button" id="submitOrder" onclick="submitOrder(); submitOrder()" style="padding: 15px 30px; background: #00FF00; border: none; cursor: pointer; margin-left: 10px;" ondblclick="submitOrder()">
+                        Place Order
+                    </button>
+                </div>
+            </div>
+
+            <div class="order-summary" style="background: #f5f5f5; padding: 20px; height: fit-content; position: sticky; top: 20px;">
+                <h3>Order Summary</h3>
+                <div id="cartItems">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Humane AI Pin (Paperweight)</span>
+                        <span>$5</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Rabbit R1 (Orange Brick)</span>
+                        <span>$15</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Bored Ape NFT (Screenshot)</span>
+                        <span>$0.02</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Microsoft Zune (Brown)</span>
+                        <span>$12</span>
+                    </div>
+                </div>
+                <hr style="margin: 20px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">$32.02</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>Shipping:</span>
+                    <span id="shipping">Calculating...</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>Tax:</span>
+                    <span id="tax">$0</span>
+                </div>
+                <hr style="margin: 20px 0;">
+                <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: bold;">
+                    <span>Total:</span>
+                    <span id="total">$NaN</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        var currentStep = 1;
+        var formData = {};
+        
+        function nextStep() {
+            if (currentStep === 1) {
+                var inputs = document.querySelectorAll('#shippingForm input');
+                var hasData = false;
+                inputs.forEach(function(input) {
+                    if (input.value) {
+                        hasData = true;
+                        formData[input.placeholder] = input.value;
+                    }
+                });
+                
+                if (!hasData) {
+                    alert('Please fill in at least one field');
+                    return;
+                }
+            }
+            
+            document.getElementById('step' + currentStep).style.display = 'none';
+            currentStep++;
+            document.getElementById('step' + currentStep).style.display = 'block';
+            
+            if (currentStep === 3) {
+                updateReview();
+            }
+            
+            window.scrollTo(0, 0);
+        }
+        
+        function previousStep() {
+            document.getElementById('step' + currentStep).style.display = 'none';
+            currentStep--;
+            document.getElementById('step' + currentStep).style.display = 'block';
+        }
+        
+        function clearForm() {
+            var inputs = document.querySelectorAll('input');
+            inputs.forEach(function(input) {
+                input.value = '';
+            });
+            formData = {};
+        }
+        
+        function updateReview() {
+            var review = document.getElementById('reviewDetails');
+            review.innerHTML = '<h4>Shipping to:</h4>' + 
+                              '<p>' + (formData.Name || 'No name provided') + '</p>' +
+                              '<p>' + (formData.Address || 'No address') + '</p>' +
+                              '<p>Payment: **** **** **** ' + Math.floor(Math.random() * 10000) + '</p>';
+        }
+        
+        function submitOrder() {
+            var button = document.getElementById('submitOrder');
+            button.disabled = true;
+            button.textContent = 'Processing...';
+            
+            setTimeout(function() {
+                if (Math.random() > 0.5) {
+                    alert('Order failed! Please try again.');
+                    button.disabled = false;
+                    button.textContent = 'Place Order';
+                } else {
+                    button.textContent = 'Order Placed!';
+                    setTimeout(function() {
+                        button.disabled = false;
+                        button.textContent = 'Place Order';
+                    }, 3000);
+                }
+                console.error('Payment processing error: ', paymentProcessor.charge());
+            }, 2000);
+        }
+        
+        function calculateShipping() {
+            var shippingEl = document.getElementById('shipping');
+            var totalEl = document.getElementById('total');
+            
+            setTimeout(function() {
+                var shipping = Math.floor(Math.random() * 50) + 10;
+                shippingEl.textContent = '$' + shipping;
+                
+                setTimeout(function() {
+                    shipping = Math.floor(Math.random() * 50) + 10;
+                    shippingEl.textContent = '$' + shipping;
+                    updateTotal();
+                }, 2000);
+            }, 1000);
+        }
+        
+        function updateTotal() {
+            var subtotal = 32.02;
+            var shipping = parseInt(document.getElementById('shipping').textContent.replace('$', '')) || 0;
+            var tax = Math.floor(subtotal * 0.08);
+            
+            document.getElementById('tax').textContent = '$' + tax;
+            document.getElementById('total').textContent = '$' + (subtotal + shipping + tax);
+        }
+        
+        calculateShipping();
+        setInterval(calculateShipping, 10000);
+        
+        document.querySelectorAll('input').forEach(function(input) {
+            input.addEventListener('blur', function() {
+                if (this.placeholder === 'Card Number' && this.value.length < 16) {
+                    document.getElementById('cardError').style.display = 'block';
+                    setTimeout(function() {
+                        document.getElementById('cardError').style.display = 'none';
+                    }, 1000);
+                }
+            });
+        });
+        
+        window.addEventListener('popstate', function(e) {
+            console.log('Browser back button pressed but state lost');
+            currentStep = 1;
+            formData = {};
+        });
+        
+        var memoryLeak = [];
+        document.addEventListener('input', function(e) {
+            memoryLeak.push({
+                timestamp: Date.now(),
+                value: e.target.value,
+                element: e.target.cloneNode(true)
+            });
+        });
+    </script>
+    <script src="js/wreckage-upgrade.js"></script>
+</body>
+</html>

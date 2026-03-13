@@ -1,0 +1,114 @@
+/* Utilities.css - Utility classes that nobody will ever use */
+
+/* Text utilities for phantom elements */
+.text-invisible { color: transparent !important; }
+.text-rainbow { background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; }
+.text-upsidedown { transform: rotate(180deg); display: inline-block; }
+.text-mirror { transform: scaleX(-1); display: inline-block; }
+.text-vibrate { animation: vibrate 0.1s infinite; }
+.text-drunk { animation: drunk 2s infinite; }
+
+@keyframes vibrate {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+@keyframes drunk {
+    0%, 100% { transform: rotate(0deg) translateX(0); }
+    25% { transform: rotate(5deg) translateX(5px); }
+    50% { transform: rotate(-5deg) translateY(5px); }
+    75% { transform: rotate(3deg) translateX(-5px); }
+}
+
+/* Spacing utilities for removed components */
+.mt-negative-100 { margin-top: -100px !important; }
+.mb-negative-100 { margin-bottom: -100px !important; }
+.ml-negative-100 { margin-left: -100px !important; }
+.mr-negative-100 { margin-right: -100px !important; }
+.p-ridiculous { padding: 999px !important; }
+.m-ridiculous { margin: 999px !important; }
+
+/* Display utilities for things that shouldn't be displayed */
+.d-none-but-not-really { display: none; visibility: visible; }
+.invisible-but-takes-space { opacity: 0; pointer-events: all; }
+.visible-but-not-clickable { opacity: 1; pointer-events: none; }
+.hidden-from-everyone { 
+    position: absolute;
+    left: -99999px;
+    top: -99999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* Position utilities for misplaced elements */
+.position-nowhere {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+}
+
+.position-offscreen-top { position: fixed; top: -200%; }
+.position-offscreen-bottom { position: fixed; bottom: -200%; }
+.position-offscreen-left { position: fixed; left: -200%; }
+.position-offscreen-right { position: fixed; right: -200%; }
+
+/* Border utilities for non-existent borders */
+.border-chaos { border: 10px solid; border-image: linear-gradient(45deg, red, blue, green, yellow) 1; }
+.border-dancing { animation: borderDance 1s infinite; }
+.border-thicc { border: 50px solid currentColor !important; }
+
+@keyframes borderDance {
+    0% { border-radius: 0%; }
+    25% { border-radius: 50% 0% 50% 0%; }
+    50% { border-radius: 0% 50% 0% 50%; }
+    75% { border-radius: 25% 75% 25% 75%; }
+    100% { border-radius: 0%; }
+}
+
+/* Shadow utilities for dramatic effect */
+.shadow-nightmare {
+    box-shadow: 
+        0 0 10px red,
+        0 0 20px orange,
+        0 0 30px yellow,
+        0 0 40px green,
+        0 0 50px blue,
+        0 0 60px indigo,
+        0 0 70px violet,
+        inset 0 0 80px black;
+}
+
+/* Cursor utilities for confusion */
+.cursor-wait-forever { cursor: wait !important; }
+.cursor-not-allowed-but-works { cursor: not-allowed !important; pointer-events: all !important; }
+.cursor-random { cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='), auto !important; }
+
+/* Z-index utilities for z-fighting */
+.z-index-moon { z-index: 999999999 !important; }
+.z-index-stratosphere { z-index: 88888888 !important; }
+.z-index-space { z-index: 77777777 !important; }
+.z-index-underground { z-index: -999999999 !important; }
+
+/* Flex utilities for broken layouts */
+.flex-chaos { display: flex !important; flex-direction: column-reverse !important; }
+.flex-broken { display: flex !important; flex-grow: 999 !important; flex-shrink: 999 !important; }
+.flex-impossible { display: flex !important; flex-basis: -100% !important; }
+
+/* Width/Height utilities that make no sense */
+.w-110 { width: 110% !important; }
+.w-200 { width: 200% !important; }
+.w-1000 { width: 1000% !important; }
+.h-viewport-2x { height: 200vh !important; }
+.h-viewport-10x { height: 1000vh !important; }
+
+/* Overflow utilities for content that doesn't exist */
+.overflow-rainbow { overflow: overlay !important; }
+.overflow-dancingscroll { overflow: scroll !important; scroll-behavior: smooth !important; }
+
+/* Filter utilities for removed images */
+.filter-deepfry { filter: contrast(200%) saturate(200%) brightness(150%) !important; }
+.filter-cursed { filter: hue-rotate(180deg) invert(1) blur(1px) !important; }
+.filter-vaporwave { filter: hue-rotate(270deg) saturate(150%) contrast(120%) !important; }

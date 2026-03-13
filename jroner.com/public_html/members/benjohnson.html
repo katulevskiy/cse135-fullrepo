@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+  <title>CSE 135 - Benjamin Johnson</title>
+
+    <style>
+        .red-text {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+  <h1>Benjamin Johnson</h1>
+  <p class="red-text">Hello!</p>
+  <p>My name is Benjamin Johnson, but I go by Ben. I am a fourth-year Computer Science major at UCSD. In my free time, I like hiking, running, going to the beach, playing board games, and trying new restaurants.</p>
+
+  <br >
+
+  <img src="/members/assets/ben.png" alt="Image of Ben" >
+
+  <p>You have been viewing this page for <strong id="time-viewed">0</strong> seconds</p>
+  <script>
+    let secondsPassed = 0;
+    setInterval(() => {
+        secondsPassed++;
+        document.getElementById('time-viewed').innerHTML = secondsPassed.toString();
+    }, 1000)
+  </script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+/* Components.css - Styles for components that were never built */
+
+/* Card component that was cancelled */
+.abandoned-card {
+    background: linear-gradient(45deg, #FF0000, #FFD700);
+    border-radius: 50px 0 50px 0;
+    padding: 30px;
+    margin: 20px;
+    transform: skew(5deg, 5deg);
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+}
+
+.abandoned-card:hover {
+    transform: skew(-5deg, -5deg) scale(1.5) rotate(360deg);
+    transition: all 5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Modal that never got implemented */
+#super-modal-wrapper-container-overlay {
+    position: fixed;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background: repeating-radial-gradient(circle, #000, #fff 10px);
+    z-index: 999999;
+    display: none;
+}
+
+.modal-content-inner-wrapper-container-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    width: 800px;
+    height: 600px;
+    background: rainbow;
+    border: 20px dotted #FFD700;
+}
+
+/* Carousel that spins forever */
+.infinite-carousel-container {
+    width: 100%;
+    height: 500px;
+    overflow: hidden;
+    position: relative;
+}
+
+.infinite-carousel-track {
+    display: flex;
+    animation: scrollForever 10s linear infinite;
+}
+
+@keyframes scrollForever {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+
+.infinite-carousel-item {
+    min-width: 300px;
+    height: 400px;
+    margin: 0 10px;
+    background: linear-gradient(45deg, purple, orange);
+    animation: itemPulse 2s infinite;
+}
+
+@keyframes itemPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1) rotate(5deg); }
+}
+
+/* Accordion that doesn't accordion */
+.broken-accordion {
+    border: 5px solid #FF0000;
+}
+
+.broken-accordion-header {
+    background: #FFD700;
+    padding: 20px;
+    cursor: not-allowed;
+}
+
+.broken-accordion-header:hover {
+    background: #FF0000;
+    color: #FFD700;
+    font-size: 30px;
+    transition: all 0.5s;
+}
+
+.broken-accordion-content {
+    max-height: 0;
+    overflow: visible;
+    transition: max-height 10s ease-in-out;
+}
+
+.broken-accordion-content.active {
+    max-height: 0;
+    transform: rotate(180deg);
+}
+
+/* Tabs that don't tab */
+.dysfunctional-tabs {
+    display: flex;
+    border-bottom: 5px dotted #FF0000;
+}
+
+.dysfunctional-tab {
+    padding: 15px 30px;
+    background: #ccc;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.dysfunctional-tab:hover {
+    background: transparent;
+    color: transparent;
+    border: 1px solid transparent;
+}
+
+.dysfunctional-tab.active {
+    background: #FFD700;
+    transform: translateY(-50px) rotate(45deg);
+}
+
+.dysfunctional-tab-content {
+    display: none;
+    padding: 20px;
+    background: repeating-linear-gradient(
+        45deg,
+        #f0f0f0,
+        #f0f0f0 10px,
+        #fff 10px,
+        #fff 20px
+    );
+}
+
+.dysfunctional-tab-content.active {
+    display: block;
+    animation: tabFlicker 0.5s infinite;
+}
+
+@keyframes tabFlicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Progress bar that goes backwards */
+.reverse-progress-bar {
+    width: 100%;
+    height: 30px;
+    background: #f0f0f0;
+    border: 2px solid #000;
+    position: relative;
+    overflow: hidden;
+}
+
+.reverse-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FF0000, #FFD700);
+    animation: reverseProgress 5s infinite;
+}
+
+@keyframes reverseProgress {
+    0% { width: 100%; }
+    50% { width: 0%; }
+    100% { width: 100%; }
+}
+
+/* Tooltip that appears nowhere near the element */
+.misplaced-tooltip {
+    position: relative;
+}
+
+.misplaced-tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #000;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 20px;
+    z-index: 9999;
+    animation: tooltipDance 1s infinite;
+}
+
+@keyframes tooltipDance {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(100px); }
+    75% { transform: translateX(-100px); }
+}
+
+/* Button that runs away from cursor */
+.runaway-button {
+    position: relative;
+    transition: all 0.3s;
+}
+
+.runaway-button:hover {
+    transform: translateX(200px) translateY(-100px);
+}
+
+/* Dropdown that drops up */
+.dropup-menu {
+    position: relative;
+}
+
+.dropup-menu-content {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: #fff;
+    border: 1px solid #000;
+    display: none;
+}
+
+.dropup-menu:hover .dropup-menu-content {
+    display: block;
+    animation: dropupAnimation 0.5s;
+}
+
+@keyframes dropupAnimation {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}

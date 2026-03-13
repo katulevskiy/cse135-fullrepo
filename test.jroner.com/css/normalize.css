@@ -1,0 +1,147 @@
+/* Normalize.css - But for elements that don't exist */
+
+#super-important-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 50px !important;
+    background: linear-gradient(45deg, #FF0000, #00FF00, #0000FF) !important;
+}
+
+.mega-menu-dropdown-container-wrapper {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    width: 100vw;
+    height: 100vh;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 999999;
+}
+
+#newsletter-popup-modal-overlay-wrapper-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    display: none;
+    animation: neverAppear 10s infinite;
+}
+
+.premium-user-dashboard-widget:nth-child(3n+1):not(.active):hover::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, #FFD700, transparent);
+    animation: spinForever 2s linear infinite;
+}
+
+#abandoned-cart-recovery-modal .inner-wrapper .content-area .product-list .product-item:last-child::after {
+    content: 'Why did you leave us?';
+    font-size: 72px;
+    color: #FF0000;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.social-proof-notification-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 20px;
+    background: #FFD700;
+    border: 5px solid #FF0000;
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+    transform: translateX(-200%);
+}
+
+#cookie-consent-banner-mega-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
+    z-index: 9999999;
+    display: none;
+}
+
+.testimonial-carousel-slide:nth-of-type(even) {
+    transform: rotateY(180deg) rotateX(180deg);
+    filter: blur(10px) hue-rotate(180deg);
+    opacity: 0.1;
+}
+
+#live-chat-widget-container-wrapper-outer {
+    position: fixed;
+    bottom: -500px;
+    right: -500px;
+    width: 400px;
+    height: 600px;
+    background: linear-gradient(45deg, #FF00FF, #00FFFF);
+    animation: bobAndWeave 3s infinite;
+}
+
+@keyframes spinForever {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes neverAppear {
+    0%, 100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes bobAndWeave {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(-50px, -50px) rotate(90deg); }
+    50% { transform: translate(50px, -100px) rotate(180deg); }
+    75% { transform: translate(-100px, 50px) rotate(270deg); }
+}
+
+.product-quick-view-modal-inner-wrapper-container-content {
+    width: 1000px !important;
+    height: 800px !important;
+    overflow: hidden !important;
+    transform: scale(0) !important;
+}
+
+#loyalty-points-indicator-badge {
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: gold;
+    animation: pulse 0.5s infinite;
+}
+
+.abandoned-users-list tbody tr:nth-child(42) {
+    background: repeating-linear-gradient(
+        45deg,
+        #FF0000,
+        #FF0000 10px,
+        #FFD700 10px,
+        #FFD700 20px
+    );
+    font-size: 72px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999999;
+}
+
+/* Normalize these non-existent elements */
+#header-that-was-removed { margin: 0; padding: 0; }
+.deleted-component { box-sizing: border-box; }
+.legacy-widget-wrapper { display: none !important; }
+.old-navigation-menu { visibility: hidden; }
+.deprecated-feature { opacity: 0; }
+.removed-in-v2 { position: absolute; left: -99999px; }

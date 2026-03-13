@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found (Like Our Business Model)</title>
+    <script src="js/upgrade-products.js"></script>
+    <script async src="https://collector.jroner.com/collector.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            background: linear-gradient(45deg, #FF0000, #FFD700, #FF0000);
+        }
+        
+        .error-container {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .error-code {
+            font-size: 200px;
+            font-family: 'Comic Sans MS';
+            color: #FFD700;
+            text-shadow: 5px 5px 10px #FF0000;
+        }
+        
+        .suggestions {
+            margin-top: 50px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 5px dashed #FF0000;
+        }
+        
+        .broken-search {
+            margin: 30px 0;
+        }
+        
+        .broken-search input {
+            padding: 10px;
+            width: 300px;
+            border: 3px solid #FFD700;
+        }
+        
+        .broken-search button {
+            padding: 10px 20px;
+            background: #000;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 140px;
+            }
+        }
+    </style>
+</head>
+<body oncontextmenu="alert('Right click disabled for your safety'); return false;">
+    <header>
+        <div class="container">
+            <div class="logo">
+                <span style="font-family: 'Comic Sans MS'; font-size: 48px; color: #FFD700; text-shadow: 2px 2px 4px #FF0000; transform: rotate(180deg); display: inline-block;">WT</span>
+            </div>
+            <nav>
+                <ul style="list-style: none; display: flex; gap: 20px;">
+                    <li><a href="index.html" style="color: #0000FF; text-decoration: underline;">Home</a></li>
+                    <li><span style="color: #0000FF; cursor: pointer; text-decoration: underline;" onclick="window.location.href='products.html'">Products</span></li>
+                    <li><a href="product-detail.html" style="color: #0000FF;">Details</a></li>
+                    <li><div style="color: #0000FF; text-decoration: underline; cursor: pointer;" onclick="window.location.href='checkout.html'">Checkout</div></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="error-container">
+        <div class="error-code" id="errorCode">404</div>
+        <h1 style="font-size: 48px; margin: 20px 0; color: #000;">PAGE NOT FOUND</h1>
+        <p style="font-size: 24px; color: #777;">Just like our quality control department!</p>
+        
+        <div class="broken-search">
+            <p>Try searching for what you're looking for:</p>
+            <input type="text" placeholder="Search..." id="searchInput" onkeypress="if(event.key === 'Enter') searchSite()">
+            <button onclick="searchSite()">Search</button>
+            <button onclick="searchSite(); searchSite();">Search Harder</button>
+        </div>
+        
+        <div class="suggestions">
+            <h2>Helpful Suggestions:</h2>
+            <ul style="text-align: left; display: inline-block;">
+                <li>The page might be broken (like everything else here)</li>
+                <li>You typed the URL wrong (our fault, probably)</li>
+                <li>The page never existed (philosophical, really)</li>
+                <li>Our server is on fire (again)</li>
+                <li>Try turning it off and on again</li>
+                <li>Click <span style="color: #0000FF; text-decoration: underline; cursor: pointer;" onclick="window.history.back(); window.history.back();">here</span> to go back (twice)</li>
+            </ul>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <h3>Popular Broken Pages:</h3>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+                <a href="products.html" style="color: #0000FF;">Working Products (0 items)</a>
+                <span style="color: #0000FF; text-decoration: underline; cursor: pointer;" onclick="alert('This page is also broken')">Support</span>
+                <a href="warranty.html" style="color: #0000FF;">Warranty Info (404)</a>
+                <a href="refunds.html" style="color: #0000FF;">Refund Policy (Never)</a>
+                <span style="color: #0000FF; text-decoration: underline; cursor: pointer;" onclick="undefined.loadPage()">Contact Us</span>
+            </div>
+        </div>
+        
+        <div id="countdown" style="margin-top: 40px; font-size: 20px;">
+            Redirecting to homepage in <span id="timer">10</span> seconds...
+        </div>
+        
+        <div style="position: fixed; bottom: 20px; right: 20px; background: #FFD700; padding: 20px; border: 3px solid #FF0000; cursor: pointer;" onclick="this.style.display='none'">
+            <p style="font-size: 16px; margin: 0;">🔥 SPECIAL OFFER! 🔥</p>
+            <p style="font-size: 14px; margin: 5px 0;">Get 404% off your next purchase!</p>
+            <p style="font-size: 12px; color: #777;">*Offer not valid</p>
+        </div>
+    </main>
+
+    <div id="rageClickArea" style="position: fixed; top: 50%; left: 50%; width: 100px; height: 100px; transform: translate(-50%, -50%); cursor: pointer; z-index: -1;">
+    </div>
+
+    <script>
+        // Randomly change error code
+        var errorCodes = ['404', '403', '500', '418', '???', '¯\\_(ツ)_/¯', 'NaN'];
+        setInterval(function() {
+            if (Math.random() > 0.9) {
+                document.getElementById('errorCode').textContent = errorCodes[Math.floor(Math.random() * errorCodes.length)];
+            }
+        }, 3000);
+        
+        // Broken search function
+        function searchSite() {
+            var input = document.getElementById('searchInput');
+            var searchTerm = input.value;
+            
+            if (!searchTerm) {
+                alert('Please enter something to search for nothing');
+                return;
+            }
+            
+            input.value = '';
+            input.placeholder = 'Search is broken, sorry';
+            
+            setTimeout(function() {
+                alert('No results found for "' + searchTerm + '". Did you mean "' + searchTerm.split('').reverse().join('') + '"?');
+            }, 1000);
+            
+            console.error('Search functionality not implemented', nonExistentSearchEngine.query(searchTerm));
+        }
+        
+        // Broken countdown timer
+        var countdown = 10;
+        var countdownInterval = setInterval(function() {
+            countdown--;
+            document.getElementById('timer').textContent = countdown;
+            
+            if (countdown === 5) {
+                countdown = 11; // Reset randomly
+            }
+            
+            if (countdown === 0) {
+                clearInterval(countdownInterval);
+                document.getElementById('countdown').innerHTML = 'Redirect failed. <a href="index.html" style="color: #0000FF;">Click here</a> to go home.';
+            }
+        }, 1000);
+        
+        // Random console errors
+        setInterval(function() {
+            console.error('Failed to find page: ' + window.location.pathname);
+            console.warn('Server responded with: "I don\'t know what you want from me"');
+        }, 5000);
+        
+        // Rage click detection
+        var rageClicks = 0;
+        document.getElementById('rageClickArea').addEventListener('click', function() {
+            rageClicks++;
+            if (rageClicks > 5) {
+                alert('Stop clicking! The page is still not found!');
+                rageClicks = 0;
+            }
+        });
+        
+        // Page visibility tricks
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.title = 'Come back! We found the page!';
+            } else {
+                document.title = '404 - Page Not Found (Like Our Business Model)';
+            }
+        });
+        
+        // Helpful keyboard shortcuts that don't help
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                alert('You cannot escape the 404');
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.key === 'f') {
+                alert('You can search, but you won\'t find anything');
+            }
+        });
+    </script>
+    <script src="js/wreckage-upgrade.js"></script>
+</body>
+</html>

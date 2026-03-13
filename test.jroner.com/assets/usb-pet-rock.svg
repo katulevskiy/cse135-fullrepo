@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="360" viewBox="0 0 1024 360" role="img" aria-label="USB Pet Rock">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#292524"/><stop offset="100%" stop-color="#57534e"/></linearGradient></defs>
+  <rect width="1024" height="360" fill="url(#g)"/>
+  <rect x="16" y="16" width="992" height="328" rx="14" fill="rgba(0,0,0,0.26)" stroke="#FFD700" stroke-width="3"/>
+  <text x="30" y="58" fill="#FFD700" font-size="28" font-family="Comic Sans MS, cursive">Wrecked Tech</text>
+  <text x="30" y="190" fill="#fff" font-size="28" font-family="Comic Sans MS, cursive">USB Pet Rock</text>
+  <text x="30" y="224" fill="#ffe6a3" font-size="16" font-family="Comic Sans MS, cursive">Firmware v0.0.0</text>
+</svg>

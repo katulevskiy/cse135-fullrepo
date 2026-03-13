@@ -1,0 +1,175 @@
+/* Animations.css - Animations for elements that don't animate */
+
+/* Spinning animations for nothing */
+@keyframes spinForeverClockwise {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes spinForeverCounterClockwise {
+    from { transform: rotate(360deg); }
+    to { transform: rotate(0deg); }
+}
+
+@keyframes spinAndGrow {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(2); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes spinAndShrink {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(0); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Bounce animations for static elements */
+@keyframes bounceToMoon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-1000vh); }
+}
+
+@keyframes bounceUncontrollably {
+    0% { transform: translateY(0) translateX(0); }
+    25% { transform: translateY(-100px) translateX(50px); }
+    50% { transform: translateY(50px) translateX(-100px); }
+    75% { transform: translateY(-150px) translateX(150px); }
+    100% { transform: translateY(0) translateX(0); }
+}
+
+/* Fade animations that don't fade properly */
+@keyframes fadeInAndOutAndInAndOut {
+    0% { opacity: 1; }
+    25% { opacity: 0; }
+    50% { opacity: 1; }
+    75% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes fadeToInvisibleButNot {
+    0% { opacity: 1; }
+    99% { opacity: 0.01; }
+    100% { opacity: 1; }
+}
+
+/* Slide animations going nowhere */
+@keyframes slideToNowhere {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(100%); }
+    50% { transform: translateX(-100%); }
+    75% { transform: translateX(50%); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes slideOffScreen {
+    to { transform: translateX(9999px); }
+}
+
+/* Shake animations for emphasis */
+@keyframes earthquakeMode {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-10px, -10px); }
+    20% { transform: translate(10px, 10px); }
+    30% { transform: translate(-10px, 10px); }
+    40% { transform: translate(10px, -10px); }
+    50% { transform: translate(-15px, 0); }
+    60% { transform: translate(15px, 0); }
+    70% { transform: translate(0, -15px); }
+    80% { transform: translate(0, 15px); }
+    90% { transform: translate(-5px, -5px); }
+}
+
+@keyframes nervousShake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-1px) rotateZ(-1deg); }
+    20% { transform: translateX(1px) rotateZ(1deg); }
+    30% { transform: translateX(-1px) rotateZ(-1deg); }
+    40% { transform: translateX(1px) rotateZ(1deg); }
+    50% { transform: translateX(-1px) rotateZ(-1deg); }
+    60% { transform: translateX(1px) rotateZ(1deg); }
+    70% { transform: translateX(-1px) rotateZ(-1deg); }
+    80% { transform: translateX(1px) rotateZ(1deg); }
+    90% { transform: translateX(-1px) rotateZ(-1deg); }
+}
+
+/* Pulse animations */
+@keyframes heartbeatErratic {
+    0% { transform: scale(1); }
+    5% { transform: scale(1.3); }
+    10% { transform: scale(1); }
+    15% { transform: scale(1.5); }
+    20% { transform: scale(1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pulseRainbow {
+    0% { box-shadow: 0 0 0 0 red; }
+    20% { box-shadow: 0 0 0 20px orange; }
+    40% { box-shadow: 0 0 0 40px yellow; }
+    60% { box-shadow: 0 0 0 60px green; }
+    80% { box-shadow: 0 0 0 80px blue; }
+    100% { box-shadow: 0 0 0 100px transparent; }
+}
+
+/* Complex combined animations */
+@keyframes chaosAnimation {
+    0% { 
+        transform: rotate(0deg) scale(1) translateX(0) translateY(0);
+        opacity: 1;
+        filter: hue-rotate(0deg);
+    }
+    25% { 
+        transform: rotate(90deg) scale(0.5) translateX(100px) translateY(-50px);
+        opacity: 0.5;
+        filter: hue-rotate(90deg) blur(5px);
+    }
+    50% { 
+        transform: rotate(180deg) scale(2) translateX(-100px) translateY(100px);
+        opacity: 0.2;
+        filter: hue-rotate(180deg) contrast(200%);
+    }
+    75% { 
+        transform: rotate(270deg) scale(0.8) translateX(50px) translateY(-100px);
+        opacity: 0.8;
+        filter: hue-rotate(270deg) brightness(200%);
+    }
+    100% { 
+        transform: rotate(360deg) scale(1) translateX(0) translateY(0);
+        opacity: 1;
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* Glitch animations */
+@keyframes glitchEffect {
+    0%, 100% {
+        transform: translate(0);
+        filter: hue-rotate(0deg);
+    }
+    20% {
+        transform: translate(-2px, 2px);
+        filter: hue-rotate(90deg);
+    }
+    40% {
+        transform: translate(-2px, -2px);
+        filter: hue-rotate(180deg);
+    }
+    60% {
+        transform: translate(2px, 2px);
+        filter: hue-rotate(270deg);
+    }
+    80% {
+        transform: translate(2px, -2px);
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* Unused animation classes */
+.animate-spin-forever { animation: spinForeverClockwise 1s linear infinite; }
+.animate-bounce-moon { animation: bounceToMoon 5s ease-in-out infinite; }
+.animate-earthquake { animation: earthquakeMode 0.5s linear infinite; }
+.animate-chaos { animation: chaosAnimation 10s linear infinite; }
+.animate-glitch { animation: glitchEffect 0.1s linear infinite; }
+.animate-nervous { animation: nervousShake 0.3s linear infinite; }
+.animate-heartbeat { animation: heartbeatErratic 2s linear infinite; }
+.animate-rainbow-pulse { animation: pulseRainbow 2s linear infinite; }

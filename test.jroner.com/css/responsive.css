@@ -1,0 +1,221 @@
+/* Responsive.css - Media queries that make things worse */
+
+/* Mobile styles that break on mobile */
+@media (max-width: 576px) {
+    body {
+        font-size: 6px !important;
+        zoom: 0.5;
+    }
+    
+    .container {
+        width: 200% !important;
+        margin-left: -50% !important;
+    }
+    
+    button {
+        padding: 2px !important;
+        font-size: 8px !important;
+    }
+    
+    img {
+        width: 1000px !important;
+        height: auto !important;
+    }
+    
+    nav {
+        position: fixed;
+        bottom: 0;
+        top: 0;
+        left: -100%;
+    }
+}
+
+/* Tablet styles that assume it's a desktop */
+@media (min-width: 577px) and (max-width: 768px) {
+    body {
+        min-width: 1920px !important;
+    }
+    
+    .container {
+        width: 1400px !important;
+    }
+    
+    * {
+        cursor: none !important;
+    }
+    
+    input, textarea {
+        font-size: 50px !important;
+    }
+}
+
+/* Desktop styles that think it's mobile */
+@media (min-width: 769px) and (max-width: 1024px) {
+    body {
+        max-width: 320px !important;
+        margin: 0 auto !important;
+        transform: scale(3);
+        transform-origin: top left;
+    }
+    
+    .desktop-only {
+        display: none !important;
+    }
+    
+    .mobile-only {
+        display: block !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 999999 !important;
+    }
+}
+
+/* Large desktop styles */
+@media (min-width: 1025px) and (max-width: 1440px) {
+    html {
+        transform: rotate(0.5deg);
+    }
+    
+    body {
+        margin-left: 100px !important;
+        margin-right: -100px !important;
+    }
+    
+    .container {
+        max-width: 500px !important;
+        min-width: 2000px !important;
+    }
+}
+
+/* 4K styles that nobody needs */
+@media (min-width: 2560px) {
+    * {
+        font-size: 100px !important;
+    }
+    
+    body {
+        zoom: 0.25;
+    }
+    
+    img {
+        image-rendering: pixelated;
+        filter: blur(10px);
+    }
+    
+    .container {
+        width: 10000px !important;
+    }
+}
+
+/* Portrait orientation chaos */
+@media (orientation: portrait) {
+    body {
+        transform: rotate(90deg) !important;
+        transform-origin: left top !important;
+        width: 100vh !important;
+        height: 100vw !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 100% !important;
+    }
+}
+
+/* Landscape orientation madness */
+@media (orientation: landscape) {
+    .landscape-hidden {
+        display: none !important;
+    }
+    
+    nav {
+        transform: rotate(-90deg);
+        position: fixed;
+        left: -200px;
+    }
+}
+
+/* Print styles that waste ink */
+@media print {
+    * {
+        background: black !important;
+        color: black !important;
+    }
+    
+    body::before {
+        content: 'PRINTING IS DISABLED FOR YOUR SAFETY';
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 72px;
+        color: red !important;
+        z-index: 999999;
+    }
+    
+    @page {
+        size: A3 landscape;
+        margin: 10cm;
+    }
+    
+    img {
+        width: 200% !important;
+        height: 200% !important;
+        filter: invert(1) contrast(200%);
+    }
+}
+
+/* Hover styles for touch devices */
+@media (hover: none) {
+    *:hover {
+        transform: scale(2) !important;
+        background: red !important;
+    }
+}
+
+/* High contrast mode that reduces contrast */
+@media (prefers-contrast: high) {
+    * {
+        color: #777 !important;
+        background: #888 !important;
+    }
+}
+
+/* Dark mode that makes things brighter */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: white !important;
+        color: yellow !important;
+        filter: brightness(200%);
+    }
+}
+
+/* Reduced motion that adds more motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.1s !important;
+        animation-iteration-count: infinite !important;
+        transition-duration: 0.01s !important;
+    }
+}
+
+/* Retina display styles */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    img {
+        image-rendering: pixelated !important;
+        transform: scale(0.5);
+    }
+}
+
+/* TV styles */
+@media tv {
+    body {
+        font-size: 200px !important;
+        line-height: 300px !important;
+    }
+    
+    * {
+        padding: 100px !important;
+    }
+}

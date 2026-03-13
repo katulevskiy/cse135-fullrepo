@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wrecked Tech - Quality Issues, Quality Prices</title>
+    <script src="js/upgrade-products.js"></script>
+    <script async src="https://collector.jroner.com/collector.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <span style="font-family: 'Comic Sans MS'; font-size: 48px; color: #FFD700; text-shadow: 2px 2px 4px #FF0000;">WT</span>
+            </div>
+            <nav>
+                <ul style="list-style: none; display: flex; gap: 20px;">
+                    <li><a href="index.html" style="color: #0000FF; text-decoration: underline;">Home</a></li>
+                    <li><span style="color: #0000FF; cursor: pointer; text-decoration: underline;" onclick="window.location.href='products.html'">Products</span></li>
+                    <li><a href="product-detail.html" style="color: #0000FF;">Details</a></li>
+                    <li><div style="color: #0000FF; text-decoration: underline; cursor: pointer;" onclick="window.location.href='checkout.html'">Checkout</div></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" style="position: relative; overflow: hidden;">
+        <img id="heroImage" src="assets/vibe-code-keyboard.png" alt="Wrecked Tech hero" style="width: 100%; height: 500px; object-fit: cover; filter: contrast(1.05) saturate(1.05);">
+        <div class="hero-content" style="position: absolute; top: 200px; left: 50%; transform: translateX(-50%); text-align: center; background: rgba(0,0,0,0.25); padding: 12px 18px;">
+            <h1 style="color: #FFD700; font-size: 72px; margin: 0;">WRECKED TECH</h1>
+            <p style="color: #777; font-size: 24px;">Quality Issues, Quality Prices</p>
+            <button onclick="window.location.href='products.html'; window.location.href='products.html';" style="padding: 5px 10px; font-size: 12px; background: #FFD700; border: none; cursor: pointer;">Shop Now</button>
+        </div>
+    </section>
+
+    <section class="product-carousel" style="padding: 50px 0; overflow-x: hidden;">
+        <h2 style="text-align: center; color: #333;">Featured Products</h2>
+        <div class="carousel-container" style="display: flex; gap: 20px; padding: 0 20px;">
+            <div class="product-card" onclick="window.location.href='product-detail.html?id=' + Math.floor(Math.random() * 6)" style="cursor: pointer;">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" data-src="assets/burnt-graphics-card.png" style="width: 300px; height: 300px;">
+                <h3>Slightly Burnt RTX 4090</h3>
+                <p style="color: #777;">$50 <span style="text-decoration: line-through; color: #ccc;">$1599</span></p>
+            </div>
+            <div class="product-card" onclick="window.location.href='product-detail.html?id=' + Math.floor(Math.random() * 6)" style="cursor: pointer;">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" data-src="assets/missing-key-laptop-1.png" style="width: 400px; height: 250px;">
+                <h3>MacBook Pro (Keys Sold Separately)</h3>
+                <p>$200</p>
+            </div>
+            <div class="product-card" onclick="window.location.href='product-detail.html?id=' + Math.floor(Math.random() * 6)" style="cursor: pointer;">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" data-src="assets/cracked-phone-1.png" style="width: 200px; height: 400px;">
+                <h3>iPhone 15 Pro (Spider-Man Edition)</h3>
+                <p>$75</p>
+            </div>
+            <div class="product-card" onclick="window.location.href='product-detail.html?id=1'" style="cursor: pointer;">
+                <img src="assets/rabbit-r1.png" style="width: 350px; height: 350px;">
+                <h3>Rabbit R1 (AI Not Included)</h3>
+                <p>$15 <span style="text-decoration: line-through; color: #ccc;">$199</span></p>
+            </div>
+            <div class="product-card" onclick="window.location.href='product-detail.html?id=0'" style="cursor: pointer;">
+                <img src="assets/humane-pin-paperweight.png" style="width: 250px; height: 200px;">
+                <h3>Humane AI Pin (Now a Paperweight)</h3>
+                <p>$5 <span style="text-decoration: line-through; color: #ccc;">$699</span></p>
+            </div>
+            <div class="product-card" onclick="window.location.href='product-detail.html?id=2'; notAFunction()" style="cursor: pointer;">
+                <img src="assets/microsoft-zune.png" style="width: 280px; height: 320px;">
+                <h3>Microsoft Zune (Still Syncing...)</h3>
+                <p style="color: #0000FF;">$12</p>
+            </div>
+            <div class="product-card" onclick="window.location.href='product-detail.html?id=3'" style="cursor: pointer;">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" data-src="assets/bored-ape-nft.png" style="width: 300px; height: 300px;">
+                <h3>Bored Ape NFT (Screenshot)</h3>
+                <p>$0.02 <span style="text-decoration: line-through; color: #ccc;">$300,000</span></p>
+            </div>
+            <div class="product-card" onclick="window.location.href='product-detail.html?id=5'" style="cursor: pointer;">
+                <img src="assets/amazon-dash-button.png" style="width: 150px; height: 150px;">
+                <h3>Amazon Dash Button (Discontinued)</h3>
+                <p>$3</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="newsletter" style="background: #f5f5f5; padding: 40px 0;">
+        <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+            <h2>Get Broken Deals!</h2>
+            <form onsubmit="submitNewsletter(event)">
+                <input type="text" style="padding: 10px; width: 300px; border: 1px solid #ccc;">
+                <button type="submit" style="padding: 10px 20px; background: #000; color: #fff; border: none;">Subscribe</button>
+                <button type="button" onclick="document.querySelector('input').value = ''" style="padding: 10px 20px; background: #FF0000; color: #fff; border: none; margin-left: 10px;">Clear</button>
+            </form>
+        </div>
+    </section>
+
+    <div class="rage-click-area" style="position: fixed; bottom: 20px; right: 20px; width: 100px; height: 100px; background: transparent;">
+    </div>
+
+    <footer style="background: #000; color: #fff; padding: 40px 0; margin-top: 50px;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; padding: 0 20px;">
+            <div>
+                <h3>Wrecked Tech</h3>
+                <p style="color: #777;">Your source for damaged electronics</p>
+            </div>
+            <div>
+                <h4>Follow Us</h4>
+                <a href="http://facebook.com/wreckedtech" style="color: #0000FF;">Facebook</a><br>
+                <a href="https://twitter.com/wreckdtech" style="color: #0000FF;">Twitter</a><br>
+                <a href="instagram.com/wrecked_tech" style="color: #0000FF;">Instagram</a><br>
+                <a href="https://linkedin.com/company/wrecked-tech/" style="color: #0000FF;">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        var heroImages = [
+            'assets/vibe-code-keyboard.png',
+            'assets/ai-toaster.png',
+            'assets/bluetooth-typewriter.png',
+            'assets/quantum-ram.png',
+            'assets/crypto-fridge.png',
+            'assets/mystery-e-waste-box.png'
+        ];
+        var heroIndex = 0;
+        var heroImageEl = document.getElementById('heroImage');
+        setInterval(function() {
+            if (!heroImageEl) return;
+            heroIndex = (heroIndex + 1) % heroImages.length;
+            heroImageEl.src = heroImages[heroIndex];
+        }, 7000);
+
+        var images = document.querySelectorAll('img[data-src]');
+        images.forEach(function(img) {
+            setTimeout(function() {
+                img.src = img.dataset.src;
+            }, 350 + (Math.random() * 700));
+        });
+
+        function submitNewsletter(e) {
+            e.preventDefault();
+            alert('Thanks for subscribing!');
+            console.log(nonExistentVariable);
+        }
+
+        document.querySelector('.rage-click-area').addEventListener('click', function() {
+            console.log('Click detected');
+        });
+
+        var products = document.querySelectorAll('.product-card');
+        products.forEach(function(card) {
+            card.addEventListener('click', function() {
+                console.log('Product clicked');
+            });
+        });
+    </script>
+    <script src="js/wreckage-upgrade.js"></script>
+</body>
+</html>
