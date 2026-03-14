@@ -20,6 +20,26 @@ function jsonOut(bool $ok, array $extra = []): void {
     exit;
 }
 
+function upsertSectionComment(mysqli $db, int $userId, string $section, string $comments): bool {
+    $commentName = '_comment';
+    $stmt = $db->prepare("SELECT id FROM saved_reports WHERE section=? AND created_by=? AND name=? LIMIT 1");
+    $stmt->bind_param("sis", $section, $userId, $commentName);
+    if (!$stmt->execute()) {
+        return false;
+    }
+
+    $existing = $stmt->get_result()->fetch_assoc();
+    if ($existing) {
+        $stmt = $db->prepare("UPDATE saved_reports SET analyst_comments=?, created_at=NOW() WHERE id=?");
+        $stmt->bind_param("si", $comments, $existing['id']);
+    } else {
+        $stmt = $db->prepare("INSERT INTO saved_reports (name, section, analyst_comments, created_by) VALUES (?,?,?,?)");
+        $stmt->bind_param("sssi", $commentName, $section, $comments, $userId);
+    }
+
+    return $stmt->execute();
+}
+
 if ($method === 'GET') {
     $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
     if ($id) {
@@ -61,21 +81,9 @@ if ($method === 'POST') {
         }
         if ($user['role'] === 'viewer') jsonOut(false, ['error' => 'Viewers cannot save comments']);
 
-        $stmt = $db->prepare("SELECT id FROM saved_reports WHERE section=? AND created_by=? AND name='_comment' LIMIT 1");
-        $stmt->bind_param("si", $section, $user['id']);
-        $stmt->execute();
-        $existing = $stmt->get_result()->fetch_assoc();
-
-        if ($existing) {
-            $stmt = $db->prepare("UPDATE saved_reports SET analyst_comments=?, created_at=NOW() WHERE id=?");
-            $stmt->bind_param("si", $comments, $existing['id']);
-        } else {
-            $name = '_comment';
-            $stmt = $db->prepare("INSERT INTO saved_reports (name, section, analyst_comments, created_by) VALUES (?,?,?,?)");
-            $stmt->bind_param("sssi", $name, $section, $comments, $user['id']);
+        if (!upsertSectionComment($db, (int)$user['id'], $section, $comments)) {
+            jsonOut(false, ['error' => $db->error ?: 'Failed to save comment']);
         }
-        $stmt->execute();
-        if ($db->errno) jsonOut(false, ['error' => $db->error]);
         jsonOut(true, ['message' => 'Comment saved']);
     }
 
@@ -85,16 +93,20 @@ if ($method === 'POST') {
         $comments   = trim($body['analyst_comments'] ?? '');
         $configJson = isset($body['config_json']) ? $body['config_json'] : null;
         $validSec   = ['visitor', 'performance', 'behavioral'];
+        $cfg        = null;
 
         if (!$name) jsonOut(false, ['error' => 'Name is required']);
         if (!in_array($section, $validSec)) jsonOut(false, ['error' => 'Invalid section']);
         if ($user['role'] === 'viewer') jsonOut(false, ['error' => 'Viewers cannot save reports']);
+        if ($configJson) {
+            $cfg = json_decode($configJson, true);
+            if (!is_array($cfg)) jsonOut(false, ['error' => 'Invalid report config']);
+        }
 
         // For analysts, check that every section in config is allowed
         if ($user['role'] === 'analyst') {
             $allowedSecs = $user['sections'] ?? [];
-            if ($configJson) {
-                $cfg = json_decode($configJson, true);
+            if ($cfg) {
                 foreach (($cfg['sections'] ?? []) as $s) {
                     if (!in_array($s['key'], $allowedSecs)) {
                         jsonOut(false, ['error' => 'No access to section: ' . $s['key']]);
@@ -105,11 +117,35 @@ if ($method === 'POST') {
             }
         }
 
+        $db->begin_transaction();
         $stmt = $db->prepare("INSERT INTO saved_reports (name, section, analyst_comments, config_json, created_by) VALUES (?,?,?,?,?)");
         $stmt->bind_param("ssssi", $name, $section, $comments, $configJson, $user['id']);
-        $stmt->execute();
-        if ($db->errno) jsonOut(false, ['error' => $db->error]);
+        if (!$stmt->execute()) {
+            $db->rollback();
+            jsonOut(false, ['error' => $db->error ?: 'Failed to save report']);
+        }
         $newId = $db->insert_id;
+
+        $sectionComments = $cfg['sections'] ?? null;
+        if ($sectionComments) {
+            foreach ($sectionComments as $savedSection) {
+                $sectionKey = $savedSection['key'] ?? '';
+                if (!in_array($sectionKey, $validSec, true)) {
+                    $db->rollback();
+                    jsonOut(false, ['error' => 'Invalid section in report config']);
+                }
+                $sectionComment = trim((string)($savedSection['comment'] ?? ''));
+                if (!upsertSectionComment($db, (int)$user['id'], $sectionKey, $sectionComment)) {
+                    $db->rollback();
+                    jsonOut(false, ['error' => $db->error ?: 'Failed to update section comment']);
+                }
+            }
+        } elseif (!upsertSectionComment($db, (int)$user['id'], $section, $comments)) {
+            $db->rollback();
+            jsonOut(false, ['error' => $db->error ?: 'Failed to update section comment']);
+        }
+
+        $db->commit();
 
         jsonOut(true, ['id' => $newId, 'message' => 'Report saved']);
     }

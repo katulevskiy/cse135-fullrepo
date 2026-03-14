@@ -98,8 +98,9 @@ $slowRows = $db->query("
 // Analyst comment
 $user    = getCurrentUser();
 $comment = '';
-$stmt = $db->prepare("SELECT analyst_comments FROM saved_reports WHERE section='performance' AND created_by=? ORDER BY created_at DESC LIMIT 1");
-$stmt->bind_param("i", $user['id']);
+$commentName = '_comment';
+$stmt = $db->prepare("SELECT analyst_comments FROM saved_reports WHERE section='performance' AND created_by=? AND name=? ORDER BY created_at DESC LIMIT 1");
+$stmt->bind_param("is", $user['id'], $commentName);
 $stmt->execute();
 $r = $stmt->get_result()->fetch_assoc();
 if ($r) $comment = $r['analyst_comments'];

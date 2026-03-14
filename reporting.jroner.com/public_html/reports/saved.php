@@ -29,6 +29,17 @@ if (canSeeSection('visitor'))     $availSections[] = 'visitor';
 if (canSeeSection('performance')) $availSections[] = 'performance';
 if (canSeeSection('behavioral'))  $availSections[] = 'behavioral';
 
+$savedSectionComments = [];
+if ($canSave) {
+    $commentName = '_comment';
+    $stmt = $db->prepare("SELECT section, analyst_comments FROM saved_reports WHERE created_by=? AND name=?");
+    $stmt->bind_param("is", $user['id'], $commentName);
+    $stmt->execute();
+    foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $row) {
+        $savedSectionComments[$row['section']] = $row['analyst_comments'] ?? '';
+    }
+}
+
 pageHead('Saved Reports', '
     .report-card{background:#1a2133;border:1px solid #2a3448;border-radius:10px;padding:20px 22px;margin-bottom:14px;transition:border-color .15s}
     .report-card:hover{border-color:#3a4a60}
@@ -251,6 +262,7 @@ const SECTION_CHARTS = {
 const SECTION_LABELS = {
     visitor:'Visitor Analytics', performance:'Performance Analytics', behavioral:'Behavioral Analytics'
 };
+const SAVED_SECTION_COMMENTS = <?= json_encode($savedSectionComments, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
 // ── Modal open/close ──────────────────────────────────────────────────────
 function openSaveModal() {
@@ -334,6 +346,10 @@ function buildSectionPanel(key) {
                 placeholder="Write your analysis for the ${SECTION_LABELS[key]} section..."></textarea>
         </div>
     `;
+    const commentField = div.querySelector('#comment-' + key);
+    if (commentField) {
+        commentField.value = SAVED_SECTION_COMMENTS[key] || '';
+    }
     return div;
 }
 
